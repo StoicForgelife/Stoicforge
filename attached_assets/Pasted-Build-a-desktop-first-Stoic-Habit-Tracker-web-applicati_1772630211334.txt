@@ -1,0 +1,200 @@
+Build a **desktop-first Stoic Habit Tracker web application** called:
+
+Forge – Stoic Discipline Tracker
+
+Tagline:
+"Forge Discipline Daily."
+
+The app should feel like a **discipline command center for focused individuals**, inspired by Stoic philosophy, ancient warriors, and minimal masculine design.
+
+TECH STACK
+
+* HTML
+* CSS
+* Vanilla JavaScript
+* Use localStorage to persist user data
+
+DESIGN STYLE
+Create a modern dark themed UI.
+
+Color palette:
+Background: #0f0f0f
+Card background: #1c1c1c
+Accent: #d4af37 (gold)
+Text: #ffffff
+Secondary text: #aaaaaa
+
+Style inspiration:
+
+* Stoic philosophy
+* Roman / Greek aesthetics
+* Minimal productivity dashboards
+
+Use card-based layout with subtle shadows, smooth hover effects, and a clean desktop layout.
+
+FONT STYLE
+Use elegant fonts such as:
+
+* Cinzel (for titles)
+* Inter or Roboto (for UI)
+
+MAIN LAYOUT
+
+Top Navigation Bar
+
+* App Title: Forge
+* Links: Dashboard | Journal | Progress | Settings
+
+SECTION 1: MEMENTO MORI PANEL
+At the top show a motivational stoic reminder:
+
+Title:
+"Memento Mori"
+
+Text example:
+"You could leave life right now. Let that determine what you do and say and think."
+
+Optional visual counter:
+Display estimated life weeks remaining with a simple progress bar.
+
+SECTION 2: DAILY STOIC QUOTE
+Display a random quote that changes daily.
+
+Include quotes from:
+
+* Marcus Aurelius
+* Seneca
+* Epictetus
+* Sun Tzu
+* Mahabharata
+* Bhagavad Gita
+* Julius Caesar
+
+Example display:
+
+"Waste no more time arguing what a good man should be. Be one."
+— Marcus Aurelius
+
+SECTION 3: HABIT TRACKER
+
+Create a habit grid with checkboxes.
+
+Default habits:
+
+* Drink Water
+* Workout
+* Study / Work
+* Journal
+* NoFap
+* Sleep 7+ Hours
+
+When a habit is completed:
+
+* Checkbox becomes highlighted
+* Progress is saved in localStorage
+
+SECTION 4: STREAK SYSTEM
+
+Track consecutive completion days for each habit.
+
+Example display:
+
+Workout 🔥 6 days
+Study 🔥 4 days
+NoFap 🔥 12 days
+
+Display streak numbers next to habits.
+
+SECTION 5: ADD CUSTOM HABITS
+
+Add an input field where users can create their own habits.
+
+Example:
+
+[ Add Habit ] input box
+[ + Add ]
+
+New habits appear in the habit tracker grid.
+
+SECTION 6: DISCIPLINE MODE (SPECIAL FEATURE)
+
+Add a toggle switch called:
+
+"Discipline Mode"
+
+When enabled, show a daily challenge list:
+
+⚔ Daily Discipline Missions
+
+☐ Drink 2L Water
+☐ Workout
+☐ Study 2 hours
+☐ No Social Media before noon
+☐ Journal reflection
+
+Display a Discipline Score:
+
+Example:
+
+Discipline Score: 4 / 5
+Status: Strong Day
+
+If score is low show message:
+"Today was weak. Rise tomorrow."
+
+SECTION 7: DISTRACTION TRACKER
+
+Allow users to log distractions:
+
+Inputs for:
+
+* Instagram minutes
+* YouTube minutes
+* Gaming minutes
+* Other distractions
+
+Calculate total wasted time.
+
+Example display:
+
+Time Wasted Today: 2h 15m
+
+Show a stoic quote afterward:
+
+"It is not that we have little time, but that we waste much of it."
+— Seneca
+
+SECTION 8: DAILY JOURNAL
+
+Add a journal text box for daily reflection.
+
+Prompt above journal:
+
+"What did you do well today, and what must improve tomorrow?"
+
+Save journal entries using localStorage.
+
+SECTION 9: PROGRESS DASHBOARD
+
+Create a simple weekly progress visualization showing completed habits.
+
+Use bars or progress indicators.
+
+Example:
+
+Mon ████
+Tue █████
+Wed ███
+Thu █████
+Fri ██
+
+GENERAL FEATURES
+
+* Smooth UI animations
+* Card based layout
+* Responsive but optimized for desktop
+* Save all data locally
+* Clean modern design
+* Subtle motivational messages
+
+The overall experience should feel like a **Stoic productivity command center that helps users build discipline and avoid distractions**.
