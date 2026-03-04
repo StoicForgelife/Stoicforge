@@ -4,6 +4,7 @@ import {
   habitLogs,
   journalEntries,
   distractionLogs,
+  focusSessions,
   type Habit,
   type InsertHabit,
   type HabitLog,
@@ -12,8 +13,10 @@ import {
   type InsertJournalEntry,
   type DistractionLog,
   type InsertDistractionLog,
+  type FocusSession,
+  type InsertFocusSession,
 } from "@shared/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc, lt } from "drizzle-orm";
 
 export interface IStorage {
   // Habits
@@ -24,6 +27,7 @@ export interface IStorage {
   // Habit Logs
   getHabitLogs(date?: string): Promise<HabitLog[]>;
   createOrUpdateHabitLog(log: InsertHabitLog): Promise<HabitLog>;
+  getHabitStreak(habitId: number): Promise<number>;
 
   // Journal Entries
   getJournalEntry(date: string): Promise<JournalEntry | undefined>;
@@ -32,6 +36,10 @@ export interface IStorage {
   // Distraction Logs
   getDistractionLog(date: string): Promise<DistractionLog | undefined>;
   createOrUpdateDistractionLog(log: InsertDistractionLog): Promise<DistractionLog>;
+
+  // Focus Sessions
+  getFocusSessions(date?: string): Promise<FocusSession[]>;
+  createFocusSession(session: InsertFocusSession): Promise<FocusSession>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -69,7 +77,10 @@ export class DatabaseStorage implements IStorage {
     if (existing.length > 0) {
       const [updated] = await db
         .update(habitLogs)
-        .set({ completed: log.completed })
+        .set({ 
+          completed: log.completed,
+          currentValue: log.currentValue
+        })
         .where(eq(habitLogs.id, existing[0].id))
         .returning();
       return updated;
@@ -77,6 +88,38 @@ export class DatabaseStorage implements IStorage {
       const [created] = await db.insert(habitLogs).values(log).returning();
       return created;
     }
+  }
+
+  async getHabitStreak(habitId: number): Promise<number> {
+    const logs = await db
+      .select()
+      .from(habitLogs)
+      .where(eq(habitLogs.habitId, habitId))
+      .orderBy(desc(habitLogs.date));
+    
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    for (const log of logs) {
+      const logDate = new Date(log.date);
+      logDate.setHours(0,0,0,0);
+      
+      // Calculate diff in days
+      const diffTime = Math.abs(today.getTime() - logDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (log.completed) {
+        streak++;
+      } else if (diffDays > 1) {
+        // If not completed and it's not today, streak breaks
+        break;
+      } else if (diffDays === 1 && !log.completed) {
+        // If yesterday was not completed, streak breaks
+        break;
+      }
+    }
+    return streak;
   }
 
   async getJournalEntry(date: string): Promise<JournalEntry | undefined> {
@@ -124,6 +167,18 @@ export class DatabaseStorage implements IStorage {
       const [created] = await db.insert(distractionLogs).values(log).returning();
       return created;
     }
+  }
+
+  async getFocusSessions(date?: string): Promise<FocusSession[]> {
+    if (date) {
+      return await db.select().from(focusSessions).where(eq(focusSessions.date, date));
+    }
+    return await db.select().from(focusSessions);
+  }
+
+  async createFocusSession(session: InsertFocusSession): Promise<FocusSession> {
+    const [created] = await db.insert(focusSessions).values(session).returning();
+    return created;
   }
 }
 

@@ -7,7 +7,9 @@ import {
   insertJournalEntrySchema, 
   journalEntries, 
   insertDistractionLogSchema, 
-  distractionLogs 
+  distractionLogs,
+  insertFocusSessionSchema,
+  focusSessions
 } from './schema';
 
 export const errorSchemas = {
@@ -70,6 +72,13 @@ export const api = {
         400: errorSchemas.validation,
       },
     },
+    streaks: {
+      method: 'GET' as const,
+      path: '/api/habits/:id/streak' as const,
+      responses: {
+        200: z.object({ streak: z.number() }),
+      },
+    },
   },
   journalEntries: {
     get: {
@@ -104,6 +113,24 @@ export const api = {
       responses: {
         200: z.custom<typeof distractionLogs.$inferSelect>(),
         400: errorSchemas.validation,
+      },
+    },
+  },
+  focusSessions: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/focus-sessions' as const,
+      input: z.object({ date: z.string().optional() }).optional(),
+      responses: {
+        200: z.array(z.custom<typeof focusSessions.$inferSelect>()),
+      },
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/focus-sessions' as const,
+      input: insertFocusSessionSchema,
+      responses: {
+        201: z.custom<typeof focusSessions.$inferSelect>(),
       },
     },
   },

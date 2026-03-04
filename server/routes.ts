@@ -14,12 +14,12 @@ export async function registerRoutes(
       const existingHabits = await storage.getHabits();
       if (existingHabits.length === 0) {
         const defaultHabits = [
-          { name: "Drink Water", isCustom: false },
-          { name: "Workout", isCustom: false },
-          { name: "Study / Work", isCustom: false },
-          { name: "Journal", isCustom: false },
-          { name: "NoFap", isCustom: false },
-          { name: "Sleep 7+ Hours", isCustom: false },
+          { name: "Drink Water", isCustom: false, goalValue: 2000, unit: "ml" },
+          { name: "Workout", isCustom: false, goalValue: 1, unit: "session" },
+          { name: "Study / Work", isCustom: false, goalValue: 4, unit: "h" },
+          { name: "Journal", isCustom: false, goalValue: 1, unit: "entry" },
+          { name: "NoFap", isCustom: false, goalValue: 1, unit: "day" },
+          { name: "Sleep 7+ Hours", isCustom: false, goalValue: 7, unit: "h" },
         ];
         
         for (const habit of defaultHabits) {
@@ -90,6 +90,12 @@ export async function registerRoutes(
     }
   });
 
+  app.get(api.habitLogs.streaks.path, async (req, res) => {
+    const id = parseInt(req.params.id);
+    const streak = await storage.getHabitStreak(id);
+    res.json({ streak });
+  });
+
   // Journal Entries
   app.get(api.journalEntries.get.path, async (req, res) => {
     const date = req.params.date;
@@ -133,6 +139,23 @@ export async function registerRoutes(
         });
       }
       throw err;
+    }
+  });
+
+  // Focus Sessions
+  app.get(api.focusSessions.list.path, async (req, res) => {
+    const date = req.query.date as string | undefined;
+    const sessions = await storage.getFocusSessions(date);
+    res.json(sessions);
+  });
+
+  app.post(api.focusSessions.create.path, async (req, res) => {
+    try {
+      const input = api.focusSessions.create.input.parse(req.body);
+      const session = await storage.createFocusSession(input);
+      res.status(201).json(session);
+    } catch (err) {
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 

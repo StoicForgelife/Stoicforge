@@ -1,0 +1,109 @@
+Improve the functionality of the current Stoic Discipline Tracker with the following upgrades.
+
+1. WATER INTAKE TRACKER
+   Instead of a simple checkbox, create a dedicated water tracker.
+
+Features:
+
+* Daily goal: 2–3 liters
+* Show progress visually (progress bar or bottles)
+* Button: "+250 ml" or "+500 ml"
+* Update total water consumed
+* Reset every new day automatically
+* Show message when goal reached: "Body disciplined. Mind sharpened."
+
+2. NOFAP TRACKER UPGRADE
+   Replace the simple checkbox with a streak system.
+
+Features:
+
+* Track current streak in days
+* Display: "Day 12 of discipline"
+* Add a warning message:
+
+"Momentary pleasure. Long-term weakness.
+Control yourself."
+
+* If user resets streak show message:
+  "Discipline broke. Rise again tomorrow."
+
+3. AUTOMATIC WASTED TIME TRACKER (BEST POSSIBLE VERSION FOR WEB)
+
+Create a system that tracks time spent in the app and allows the user to log distractions.
+
+Features:
+
+* Start timer when user opens the app
+* Track time spent on:
+
+  * Social Media
+  * YouTube / Video
+  * Gaming
+  * Other distractions
+* Allow user to click quick buttons like:
+  +5 min Instagram
+  +10 min YouTube
+* Automatically update "Total Time Wasted Today"
+
+Display stoic quote below:
+"It is not that we have little time, but that we waste much of it." — Seneca
+
+4. STUDY / FOCUS MODE
+
+Add a "Focus Mode" or "Study Mode" feature.
+
+When activated:
+
+* Screen becomes minimal
+* Dark background
+* Large timer appears
+* Default session: 25 minutes (Pomodoro style)
+
+Display motivational stoic quote during focus:
+
+"You become what you give your attention to."
+
+Features:
+
+* Start / Pause timer
+* Show session progress bar
+* When timer ends show message:
+  "Session complete. Discipline grows."
+
+5. HABIT PROGRESS IMPROVEMENT
+
+For habits like:
+
+* Workout
+* Study
+* Sleep
+* Journal
+
+Show small progress indicators instead of only checkboxes.
+
+Example:
+Study: 2h / 4h goal
+Workout: Completed
+Sleep: 6h / 7h goal
+
+6. DAILY RESET SYSTEM
+
+Add automatic daily reset for:
+
+* water intake
+* habits
+* wasted time
+* focus sessions
+
+Store previous days in history so the progress chart updates.
+
+7. BETTER VISUAL FEEDBACK
+
+Add:
+
+* subtle animations when habits are completed
+* glow effect for streaks
+* progress bars for measurable habits
+* motivational messages after completing tasks.
+
+Maintain the current dark stoic design and gold accent theme.
