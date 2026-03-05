@@ -1,46 +1,72 @@
+import { useState, useEffect } from "react";
+import { format, differenceInDays, differenceInYears, addYears } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@shared/routes";
 
 export function MementoMori() {
-  // Assume an average lifespan of 80 years = 4160 weeks
-  const totalWeeks = 4160;
-  // Let's assume the user is 25 for visual demonstration purposes
-  // In a real app, you'd ask for their birthdate.
-  const assumedAge = 25; 
-  const livedWeeks = assumedAge * 52;
-  const percentage = (livedWeeks / totalWeeks) * 100;
+  const queryClient = useQueryClient();
+  const { data: stats } = useQuery({ queryKey: [api.userStats.get.path], queryFn: async () => (await fetch(api.userStats.get.path)).json() });
+  const updateStats = useMutation({
+    mutationFn: async (dob: string) => fetch('/api/user-stats', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dob }) }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [api.userStats.get.path] })
+  });
+
+  const [dobInput, setDobInput] = useState("");
+
+  if (!stats) return null;
+
+  if (!stats.dob) {
+    return (
+      <Card className="border-primary/50">
+        <CardHeader><CardTitle className="font-cinzel text-xl">The Journey Begins</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-xs text-muted-foreground italic">"To live is the rarest thing in the world. Most people exist, that is all."</p>
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase font-bold text-muted-foreground">Date of Birth</label>
+            <input type="date" value={dobInput} onChange={(e) => setDobInput(e.target.value)} className="w-full bg-background border border-border rounded-lg p-2 text-sm" />
+            <button onClick={() => updateStats.mutate(dobInput)} disabled={!dobInput} className="w-full bg-primary text-primary-foreground py-2 rounded-lg font-bold text-xs uppercase tracking-widest">Inscribe</button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const birthDate = new Date(stats.dob);
+  const today = new Date();
+  const age = differenceInYears(today, birthDate);
+  const daysLived = differenceInDays(today, birthDate);
+  const deathDate = addYears(birthDate, 80);
+  const daysRemaining = differenceInDays(deathDate, today);
+  const yearsRemaining = differenceInYears(deathDate, today);
+  const totalDays = differenceInDays(deathDate, birthDate);
+  const progress = (daysLived / totalDays) * 100;
 
   return (
     <Card className="border-t-4 border-t-primary">
       <CardHeader>
-        <CardTitle className="font-cinzel flex items-center justify-between">
-          <span className="text-gold-gradient text-2xl">Memento Mori</span>
-        </CardTitle>
-        <p className="text-sm text-muted-foreground italic font-serif">
-          "You could leave life right now. Let that determine what you do and say and think."
-        </p>
+        <CardTitle className="font-cinzel text-2xl text-primary drop-shadow-[0_0_10px_rgba(212,175,55,0.3)]">Memento Mori</CardTitle>
+        <p className="text-xs text-muted-foreground italic font-serif">"Time is limited. Use it wisely."</p>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4 mt-2">
-          <div className="flex justify-between text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-            <span>Time Lived</span>
-            <span>Time Remaining</span>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <div className="text-[10px] uppercase font-bold text-muted-foreground">Age</div>
+            <div className="text-xl font-bold font-cinzel">{age} Years</div>
           </div>
-          
-          <div className="h-4 w-full bg-secondary rounded-full overflow-hidden flex shadow-inner">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${percentage}%` }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="h-full bg-gradient-to-r from-primary/60 to-primary relative"
-            >
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4yKSIvPjwvc3ZnPg==')] opacity-30" />
-            </motion.div>
+          <div className="space-y-1 text-right">
+            <div className="text-[10px] uppercase font-bold text-muted-foreground">Days Lived</div>
+            <div className="text-xl font-bold font-mono">{daysLived.toLocaleString()}</div>
           </div>
-          
-          <div className="text-right text-xs text-muted-foreground">
-            Approx. {Math.max(0, totalWeeks - livedWeeks).toLocaleString()} weeks left.
-          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between text-[10px] uppercase font-bold text-muted-foreground"><span>Life Progress</span><span>{progress.toFixed(1)}%</span></div>
+          <div className="h-2 w-full bg-secondary rounded-full overflow-hidden"><motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 2 }} className="h-full bg-primary" /></div>
+        </div>
+        <div className="text-center bg-secondary/20 p-3 rounded-lg border border-border/50">
+          <div className="text-2xl font-bold font-mono text-primary">{daysRemaining.toLocaleString()}</div>
+          <div className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Estimated Days Remaining</div>
         </div>
       </CardContent>
     </Card>

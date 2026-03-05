@@ -1,66 +1,67 @@
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { format, subDays } from "date-fns";
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from 'recharts';
+import { format, subDays, startOfWeek, startOfMonth, startOfYear, eachDayOfInterval, eachMonthOfInterval, isSameDay, isSameMonth } from "date-fns";
 import { Activity } from "lucide-react";
-
-// For MVP, we will mock the last 7 days of data since fetching and aggregating 
-// requires a slightly more complex backend endpoint than provided in the scope.
-// This demonstrates the visual capability required.
-const generateMockData = () => {
-  return Array.from({ length: 7 }).map((_, i) => {
-    const d = subDays(new Date(), 6 - i);
-    return {
-      name: format(d, 'EEE'),
-      score: Math.floor(Math.random() * 8) + 2 // Random score between 2-10
-    };
-  });
-};
-
-const data = generateMockData();
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@shared/routes";
 
 export function ProgressDashboard() {
+  const [range, setRange] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Week');
+  const { data: sessions } = useQuery({ queryKey: [api.focusSessions.list.path], queryFn: async () => (await fetch(api.focusSessions.list.path)).json() });
+
+  const getData = () => {
+    if (!sessions) return [];
+    const now = new Date();
+    if (range === 'Day') {
+      const todaySessions = sessions.filter((s: any) => s.date === format(now, 'yyyy-MM-dd'));
+      return [{ name: format(now, 'EEE'), value: todaySessions.reduce((acc: number, s: any) => acc + s.durationMinutes, 0) }];
+    }
+    if (range === 'Week') {
+      const start = startOfWeek(now, { weekStartsOn: 1 });
+      return eachDayOfInterval({ start, end: now }).map(d => ({
+        name: format(d, 'EEE'),
+        value: sessions.filter((s: any) => s.date === format(d, 'yyyy-MM-dd')).reduce((acc: number, s: any) => acc + s.durationMinutes, 0)
+      }));
+    }
+    if (range === 'Month') {
+      const start = startOfMonth(now);
+      return eachDayOfInterval({ start, end: now }).map(d => ({
+        name: format(d, 'd'),
+        value: sessions.filter((s: any) => s.date === format(d, 'yyyy-MM-dd')).reduce((acc: number, s: any) => acc + s.durationMinutes, 0)
+      }));
+    }
+    if (range === 'Year') {
+      const start = startOfYear(now);
+      return eachMonthOfInterval({ start, end: now }).map(m => ({
+        name: format(m, 'MMM'),
+        value: sessions.filter((s: any) => isSameMonth(new Date(s.date), m)).reduce((acc: number, s: any) => acc + s.durationMinutes, 0)
+      }));
+    }
+    return [];
+  };
+
+  const chartData = getData();
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-3 pb-6">
-        <Activity className="text-primary" size={24} />
-        <CardTitle className="font-cinzel text-xl">Consistency Trend</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between pb-6">
+        <div className="flex items-center gap-3"><Activity className="text-primary" size={24} /><CardTitle className="font-cinzel text-xl">Focus Trends</CardTitle></div>
+        <div className="flex bg-secondary/30 p-1 rounded-lg">
+          {['Day', 'Week', 'Month', 'Year'].map(r => (
+            <button key={r} onClick={() => setRange(r as any)} className={`px-2 py-1 text-[10px] font-bold rounded transition-all ${range === r ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}>{r}</button>
+          ))}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
+            <AreaChart data={chartData}>
+              <defs><linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/><stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/></linearGradient></defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
-              <XAxis 
-                dataKey="name" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                dy={10}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  borderColor: 'hsl(var(--border))',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)'
-                }}
-                itemStyle={{ color: 'hsl(var(--primary))' }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="score" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                fillOpacity={1} 
-                fill="url(#colorScore)" 
-                animationDuration={1500}
-              />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
+              <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }} />
+              <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#colorValue)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

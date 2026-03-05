@@ -17,7 +17,7 @@ import {
   type UserStats,
   type Achievement,
 } from "@shared/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   getHabits(): Promise<Habit[]>;
@@ -32,7 +32,7 @@ export interface IStorage {
   getFocusSessions(date?: string): Promise<FocusSession[]>;
   createFocusSession(session: InsertFocusSession): Promise<FocusSession>;
   getUserStats(): Promise<UserStats>;
-  updateUserXp(xpChange: number): Promise<UserStats>;
+  updateUserStats(updates: Partial<UserStats>): Promise<UserStats>;
   getAchievements(): Promise<Achievement[]>;
   unlockAchievement(name: string): Promise<void>;
 }
@@ -70,18 +70,9 @@ export class DatabaseStorage implements IStorage {
         .set({ completed: log.completed, currentValue: log.currentValue })
         .where(eq(habitLogs.id, existing[0].id))
         .returning();
-      
-      if (log.completed && !existing[0].completed) {
-        const habit = (await db.select().from(habits).where(eq(habits.id, log.habitId)))[0];
-        await this.updateUserXp(habit.xpReward);
-      }
       return updated;
     } else {
       const [created] = await db.insert(habitLogs).values(log).returning();
-      if (log.completed) {
-        const habit = (await db.select().from(habits).where(eq(habits.id, log.habitId)))[0];
-        await this.updateUserXp(habit.xpReward);
-      }
       return created;
     }
   }
@@ -90,10 +81,6 @@ export class DatabaseStorage implements IStorage {
     const logs = await db.select().from(habitLogs).where(eq(habitLogs.habitId, habitId)).orderBy(desc(habitLogs.date));
     let streak = 0;
     const todayStr = new Date().toISOString().split('T')[0];
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-
     for (const log of logs) {
       if (log.completed) streak++;
       else if (log.date !== todayStr) break;
@@ -113,7 +100,7 @@ export class DatabaseStorage implements IStorage {
   async createOrUpdateJournalEntry(entry: InsertJournalEntry): Promise<JournalEntry> {
     const existing = await this.getJournalEntry(entry.date);
     if (existing) {
-      const [updated] = await db.update(journalEntries).set({ content: entry.content }).where(eq(journalEntries.id, existing.id)).returning();
+      const [updated] = await db.update(journalEntries).set({ content: entry.content, timestamp: entry.timestamp }).where(eq(journalEntries.id, existing.id)).returning();
       return updated;
     } else {
       const [created] = await db.insert(journalEntries).values(entry).returning();
@@ -128,21 +115,18 @@ export class DatabaseStorage implements IStorage {
 
   async createFocusSession(session: InsertFocusSession): Promise<FocusSession> {
     const [created] = await db.insert(focusSessions).values(session).returning();
-    await this.updateUserXp(session.xpEarned);
     return created;
   }
 
   async getUserStats(): Promise<UserStats> {
     let [stats] = await db.select().from(userStats);
-    if (!stats) [stats] = await db.insert(userStats).values({ totalXp: 0, level: 1 }).returning();
+    if (!stats) [stats] = await db.insert(userStats).values({ totalXp: 0, level: 1, dob: null }).returning();
     return stats;
   }
 
-  async updateUserXp(xpChange: number): Promise<UserStats> {
+  async updateUserStats(updates: Partial<UserStats>): Promise<UserStats> {
     const stats = await this.getUserStats();
-    const newXp = stats.totalXp + xpChange;
-    const newLevel = Math.floor(newXp / 100) + 1;
-    const [updated] = await db.update(userStats).set({ totalXp: newXp, level: Math.min(newLevel, 50), lastUpdated: new Date() }).where(eq(userStats.id, stats.id)).returning();
+    const [updated] = await db.update(userStats).set({ ...updates, lastUpdated: new Date() }).where(eq(userStats.id, stats.id)).returning();
     return updated;
   }
 

@@ -1,0 +1,343 @@
+You are improving my existing productivity web application.
+
+IMPORTANT RULES:
+
+• Do NOT rebuild the project from scratch
+• Do NOT regenerate the UI layout
+• Only fix broken features and extend the current systems
+• Keep the existing theme and structure
+• Use localStorage so data persists after refresh
+
+Update the application name everywhere from **Forge** to **StoicForge**.
+
+---
+
+1. Live Focus Timer System
+
+Remove the fixed 25-minute Pomodoro timer.
+
+Replace it with a **Live Focus Timer** with these controls:
+
+Start
+Pause
+End Session
+
+Behavior:
+
+Start → timer begins counting
+Pause → pauses the timer
+End Session → stops timer and calculates focus duration
+
+When a session ends:
+
+• calculate focus time
+• reward XP
+
+Example XP system:
+
+15 minutes → 5 XP
+30 minutes → 12 XP
+60 minutes → 25 XP
+90 minutes → 40 XP
+120 minutes → 60 XP
+
+Display a floating message:
+
+"Focus Session Complete — +XP Earned"
+
+Focus time must update:
+
+• XP system
+• consistency statistics
+• level progress
+
+---
+
+2. XP System Fix
+
+XP currently does not update correctly.
+
+Fix so XP increases immediately when:
+
+• focus session ends
+• discipline task is completed
+• Spartan task is completed
+
+XP bar and level progress must update in real time.
+
+Display notification:
+
+"+10 XP Earned"
+
+---
+
+3. Daily Discipline Section Fix
+
+The **+ Add Task button currently does not work**.
+
+Fix it so users can add custom habits.
+
+Add default discipline tasks automatically:
+
+Workout
+Drink Water
+Walk
+Study / Work
+Stretching
+Reading
+Meditation
+
+Micro discipline tasks:
+
+10 Pushups
+20 Squats
+30 Second Plank
+
+When a task is completed:
+
+• button turns green
+• subtle glow animation appears
+• XP is rewarded
+• completion is saved
+
+---
+
+4. Spartan Mode System
+
+The Spartan Mode section is currently empty and tasks cannot be ticked.
+
+Add default Spartan challenges:
+
+Cold Shower
+2 Hour Deep Work
+Digital Detox
+Outdoor Walk
+Extra Workout
+
+These tasks should give **extra XP rewards**.
+
+When completed:
+
+• button highlights
+• button turns green
+• XP reward animation appears
+
+---
+
+5. Level and Rank System
+
+Replace the wasted time section with a **progress system**.
+
+Users level up based on:
+
+• focus sessions
+• discipline tasks
+• Spartan tasks
+
+Display:
+
+Current Level
+Current Rank
+XP Progress Bar
+
+Create **50 levels**.
+
+Rank titles:
+
+1–5 Recruit
+6–10 Initiate
+11–15 Disciplined
+16–20 Practitioner
+21–25 Warrior
+26–30 Spartan
+31–35 Iron Mind
+36–40 Stoic
+41–45 Ascendant
+46–50 Eternal
+
+Leveling up should require meaningful XP progress.
+
+---
+
+6. Achievement System
+
+The achievement section is currently empty.
+
+Add visible achievements:
+
+First Focus Session
+First Discipline Day
+7 Day Streak
+5 Workouts Completed
+
+Secret achievements (hidden until unlocked):
+
+Monk Mode → 30 day NoFap streak
+Beast Mode → 6 hours focus in one day
+Unbreakable → 50 day streak
+
+When unlocked:
+
+show a small popup animation.
+
+---
+
+7. NoFap Discipline Tracker
+
+Add a NoFap tracking system.
+
+Display:
+
+Current Streak
+Best Streak
+
+Buttons:
+
+Clean Day
+Relapse
+Emergency
+
+Behavior:
+
+Clean Day → confirms discipline for today
+Relapse → resets streak to 0
+Emergency → opens a popup modal
+
+Emergency popup should show messages like:
+
+"You are stronger than your impulses."
+
+"Urges pass. Discipline stays."
+
+Then suggest actions:
+
+Do 10 pushups
+Take a cold shower
+Go for a walk
+
+Buttons must visually respond:
+
+Clean Day → green glow
+Relapse → red highlight
+Emergency → yellow highlight
+
+---
+
+8. Animations
+
+Add lightweight UI animations.
+
+Examples:
+
+• discipline tasks turning green
+• ember glow effect when XP is earned
+• achievement unlock animation
+• level-up popup
+
+Animations should be subtle and lightweight.
+
+---
+
+9. Consistency Statistics Graph
+
+Fix the focus statistics graph.
+
+It should dynamically update based on focus sessions.
+
+Allow switching between:
+
+Day
+Week
+Month
+Year
+
+Behavior:
+
+Day → focus time today
+Week → focus time for each day of the week
+Month → focus time across the month
+Year → focus time per month
+
+Graph should update when the time period is changed.
+
+---
+
+10. Evening Reflection Journal Fix
+
+Currently reflections do not save properly.
+
+Fix the system so when a reflection is written and saved:
+
+• entry is stored
+• entry appears in a reflection history list
+• entries persist after refresh
+
+Each reflection should display:
+
+Date
+Time
+
+Example:
+
+March 6, 2026 — 9:42 PM
+
+---
+
+11. Digital Clock
+
+Add a live digital clock on the dashboard.
+
+Display:
+
+Current Time
+Current Date
+
+Example:
+
+9:42 PM
+March 6, 2026
+
+The clock should update every second.
+
+---
+
+12. Memento Mori Automatic Life Tracker
+
+Improve the Memento Mori system.
+
+On first launch ask the user for their **Date of Birth**.
+
+Save this using localStorage so it is only asked once.
+
+Automatically calculate:
+
+Age in Years
+Total Days Lived
+Estimated Days Remaining
+Estimated Years Remaining
+
+Use an average lifespan estimate of **80 years**.
+
+Example display:
+
+Age: 23 Years
+Days Lived: 8,395
+Estimated Days Remaining: 20,000
+
+This should update automatically over time.
+
+Display a reflection message such as:
+
+"Time is limited. Use it wisely."
+
+---
+
+Ensure all systems integrate with:
+
+• focus timer
+• XP system
+• streak system
+• discipline tasks
+• Spartan tasks
+
+The application must remain lightweight and organized.

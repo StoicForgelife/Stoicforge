@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { sql } from "drizzle-orm";
 
 export const habits = pgTable("habits", {
   id: serial("id").primaryKey(),
@@ -24,15 +25,7 @@ export const journalEntries = pgTable("journal_entries", {
   id: serial("id").primaryKey(),
   date: text("date").notNull(), 
   content: text("content").notNull(),
-});
-
-export const distractionLogs = pgTable("distraction_logs", {
-  id: serial("id").primaryKey(),
-  date: text("date").notNull(), 
-  instagramMinutes: integer("instagram_minutes").default(0).notNull(),
-  youtubeMinutes: integer("youtube_minutes").default(0).notNull(),
-  gamingMinutes: integer("gaming_minutes").default(0).notNull(),
-  otherMinutes: integer("other_minutes").default(0).notNull(),
+  timestamp: text("timestamp").notNull(), // Added for Time display
 });
 
 export const focusSessions = pgTable("focus_sessions", {
@@ -48,6 +41,7 @@ export const userStats = pgTable("user_stats", {
   totalXp: integer("total_xp").default(0).notNull(),
   level: integer("level").default(1).notNull(),
   lastUpdated: timestamp("last_updated").defaultNow(),
+  dob: text("dob"), // Added for Memento Mori
 });
 
 export const achievements = pgTable("achievements", {
@@ -62,7 +56,6 @@ export const achievements = pgTable("achievements", {
 export const insertHabitSchema = createInsertSchema(habits).omit({ id: true });
 export const insertHabitLogSchema = createInsertSchema(habitLogs).omit({ id: true });
 export const insertJournalEntrySchema = createInsertSchema(journalEntries).omit({ id: true });
-export const insertDistractionLogSchema = createInsertSchema(distractionLogs).omit({ id: true });
 export const insertFocusSessionSchema = createInsertSchema(focusSessions).omit({ id: true });
 export const insertUserStatsSchema = createInsertSchema(userStats).omit({ id: true, lastUpdated: true });
 export const insertAchievementSchema = createInsertSchema(achievements).omit({ id: true, unlockedAt: true });
@@ -74,17 +67,7 @@ export type HabitLog = typeof habitLogs.$inferSelect;
 export type InsertHabitLog = z.infer<typeof insertHabitLogSchema>;
 export type JournalEntry = typeof journalEntries.$inferSelect;
 export type InsertJournalEntry = z.infer<typeof insertJournalEntrySchema>;
-export type DistractionLog = typeof distractionLogs.$inferSelect;
-export type InsertDistractionLog = z.infer<typeof insertDistractionLogSchema>;
 export type FocusSession = typeof focusSessions.$inferSelect;
 export type InsertFocusSession = z.infer<typeof insertFocusSessionSchema>;
 export type UserStats = typeof userStats.$inferSelect;
 export type Achievement = typeof achievements.$inferSelect;
-
-// API Contract Types
-export type CreateHabitRequest = InsertHabit;
-export type CreateHabitLogRequest = InsertHabitLog;
-export type UpdateHabitLogRequest = Partial<InsertHabitLog>;
-export type CreateJournalEntryRequest = InsertJournalEntry;
-export type CreateDistractionLogRequest = InsertDistractionLog;
-export type CreateFocusSessionRequest = InsertFocusSession;
