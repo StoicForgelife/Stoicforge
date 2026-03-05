@@ -9,7 +9,9 @@ import {
   insertDistractionLogSchema, 
   distractionLogs,
   insertFocusSessionSchema,
-  focusSessions
+  focusSessions,
+  userStats,
+  achievements
 } from './schema';
 
 export const errorSchemas = {
@@ -88,6 +90,13 @@ export const api = {
         200: z.custom<typeof journalEntries.$inferSelect>().nullable(),
       },
     },
+    list: {
+      method: 'GET' as const,
+      path: '/api/journal-entries' as const,
+      responses: {
+        200: z.array(z.custom<typeof journalEntries.$inferSelect>()),
+      },
+    },
     createOrUpdate: {
       method: 'POST' as const,
       path: '/api/journal-entries' as const,
@@ -98,21 +107,21 @@ export const api = {
       },
     },
   },
-  distractionLogs: {
+  userStats: {
     get: {
       method: 'GET' as const,
-      path: '/api/distraction-logs/:date' as const,
+      path: '/api/user-stats' as const,
       responses: {
-        200: z.custom<typeof distractionLogs.$inferSelect>().nullable(),
+        200: z.custom<typeof userStats.$inferSelect>(),
       },
     },
-    createOrUpdate: {
-      method: 'POST' as const,
-      path: '/api/distraction-logs' as const,
-      input: insertDistractionLogSchema,
+  },
+  achievements: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/achievements' as const,
       responses: {
-        200: z.custom<typeof distractionLogs.$inferSelect>(),
-        400: errorSchemas.validation,
+        200: z.array(z.custom<typeof achievements.$inferSelect>()),
       },
     },
   },

@@ -1,105 +1,91 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
-import { Brain, Timer, Play, Pause, RotateCcw } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Progress } from "./ui/progress";
+import { Timer, Play, Pause, Square, Trophy } from "lucide-react";
+import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@shared/routes";
+import { useToast } from "@/hooks/use-toast";
+
+const XP_STAGES = [
+  { mins: 120, xp: 60 },
+  { mins: 90, xp: 40 },
+  { mins: 60, xp: 25 },
+  { mins: 30, xp: 12 },
+  { mins: 15, xp: 5 },
+];
 
 export function FocusMode() {
   const [isActive, setIsActive] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
-  const [totalTime] = useState(25 * 60);
+  const [seconds, setSeconds] = useState(0);
   const [isMinimal, setIsMinimal] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const saveSession = useMutation({
-    mutationFn: async (minutes: number) => {
+  const createSession = useMutation({
+    mutationFn: async (data: any) => {
       const res = await fetch(api.focusSessions.create.path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: format(new Date(), 'yyyy-MM-dd'),
-          durationMinutes: minutes,
-          startTime: format(new Date(), 'HH:mm')
-        })
+        body: JSON.stringify(data)
       });
       return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [api.userStats.get.path] });
+      toast({
+        title: "Focus Session Complete",
+        description: `+${data.xpEarned} XP Earned. Discipline grows.`,
+      });
     }
   });
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isActive && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft(t => t - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && isActive) {
-      setIsActive(false);
-      saveSession.mutate(25);
+    if (isActive) {
+      timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
     }
-    return () => clearInterval(interval);
-  }, [isActive, timeLeft]);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [isActive]);
 
-  const toggle = () => setIsActive(!isActive);
-  const reset = () => {
+  const handleEnd = () => {
     setIsActive(false);
-    setTimeLeft(25 * 60);
+    const mins = Math.floor(seconds / 60);
+    let xp = 0;
+    for (const stage of XP_STAGES) {
+      if (mins >= stage.mins) { xp = stage.xp; break; }
+    }
+    if (mins > 0) {
+      createSession.mutate({
+        date: format(new Date(), 'yyyy-MM-dd'),
+        durationMinutes: mins,
+        startTime: format(new Date(), 'HH:mm'),
+        xpEarned: xp
+      });
+    }
+    setSeconds(0);
+    setIsMinimal(false);
   };
 
-  const mins = Math.floor(timeLeft / 60);
-  const secs = timeLeft % 60;
-  const percentage = ((totalTime - timeLeft) / totalTime) * 100;
+  const displayTime = () => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
 
   if (isMinimal) {
     return (
-      <motion.div 
-        layoutId="focus-container"
-        className="fixed inset-0 z-[100] bg-[#0f0f0f] flex flex-col items-center justify-center p-8 text-center"
-      >
-        <button 
-          onClick={() => setIsMinimal(false)}
-          className="absolute top-8 right-8 text-muted-foreground hover:text-primary font-cinzel uppercase tracking-widest text-sm"
-        >
-          Exit Focus
-        </button>
-
-        <div className="space-y-12 max-w-xl">
-          <p className="text-muted-foreground font-serif italic text-lg leading-relaxed">
-            "You become what you give your attention to."
-          </p>
-
-          <div className="text-[12rem] font-mono font-bold text-foreground leading-none drop-shadow-[0_0_50px_rgba(212,175,55,0.1)]">
-            {mins}:{secs < 10 ? `0${secs}` : secs}
-          </div>
-
-          <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-            <motion.div 
-              className="h-full bg-primary" 
-              initial={{ width: 0 }}
-              animate={{ width: `${percentage}%` }}
-            />
-          </div>
-
-          <div className="flex gap-8 justify-center">
-            <button onClick={toggle} className="p-6 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all">
-              {isActive ? <Pause size={48} /> : <Play size={48} />}
-            </button>
-            <button onClick={reset} className="p-6 rounded-full bg-secondary/30 border border-border/50 text-muted-foreground hover:text-foreground transition-all">
-              <RotateCcw size={48} />
-            </button>
-          </div>
-          
-          {timeLeft === 0 && (
-            <motion.p 
-              initial={{ opacity: 0, scale: 0.9 }} 
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-primary font-cinzel text-2xl font-bold tracking-widest"
-            >
-              Session complete. Discipline grows.
-            </motion.p>
-          )}
+      <motion.div layoutId="focus-container" className="fixed inset-0 z-[100] bg-[#0f0f0f] flex flex-col items-center justify-center text-center">
+        <div className="text-[12rem] font-mono font-bold text-foreground leading-none">{displayTime()}</div>
+        <div className="flex gap-8 mt-12">
+          <button onClick={() => setIsActive(!isActive)} className="p-6 rounded-full bg-primary/10 border border-primary/30 text-primary">
+            {isActive ? <Pause size={48} /> : <Play size={48} />}
+          </button>
+          <button onClick={handleEnd} className="p-6 rounded-full bg-secondary/30 border border-border/50 text-muted-foreground">
+            <Square size={48} />
+          </button>
         </div>
       </motion.div>
     );
@@ -108,41 +94,16 @@ export function FocusMode() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="font-cinzel text-xl flex items-center gap-2">
-          <Timer className="text-primary" size={20} />
-          Focus Engine
-        </CardTitle>
-        <button 
-          onClick={() => setIsMinimal(true)}
-          className="text-[10px] uppercase font-bold text-primary/60 hover:text-primary border border-primary/20 px-2 py-1 rounded transition-colors"
-        >
-          Enter Focus Mode
-        </button>
+        <CardTitle className="font-cinzel text-xl flex items-center gap-2"><Timer className="text-primary" size={20} />Focus Timer</CardTitle>
+        <button onClick={() => setIsMinimal(true)} className="text-[10px] uppercase font-bold text-primary/60 hover:text-primary">Enter Fullscreen</button>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="text-center space-y-2">
-          <div className="text-5xl font-mono font-bold text-foreground">
-            {mins}:{secs < 10 ? `0${secs}` : secs}
-          </div>
-          <div className="text-xs text-muted-foreground uppercase tracking-widest">Pomodoro Session</div>
-        </div>
-
-        <Progress value={percentage} className="h-1" />
-
+        <div className="text-center"><div className="text-5xl font-mono font-bold text-foreground">{displayTime()}</div></div>
         <div className="flex gap-3">
-          <button 
-            onClick={toggle}
-            className="flex-1 bg-primary/20 text-primary border border-primary/50 py-3 rounded-xl font-cinzel font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all flex items-center justify-center gap-2"
-          >
-            {isActive ? <Pause size={16} /> : <Play size={16} />}
-            {isActive ? "Pause" : "Ignite"}
+          <button onClick={() => setIsActive(!isActive)} className="flex-1 bg-primary/20 text-primary border border-primary/50 py-3 rounded-xl font-cinzel font-bold text-xs flex items-center justify-center gap-2">
+            {isActive ? <Pause size={16} /> : <Play size={16} />}{isActive ? "Pause" : "Start"}
           </button>
-          <button 
-            onClick={reset}
-            className="p-3 bg-secondary/30 border border-border/50 rounded-xl text-muted-foreground hover:text-foreground transition-all"
-          >
-            <RotateCcw size={18} />
-          </button>
+          <button onClick={handleEnd} className="p-3 bg-secondary/30 border border-border/50 rounded-xl text-muted-foreground"><Square size={18} /></button>
         </div>
       </CardContent>
     </Card>

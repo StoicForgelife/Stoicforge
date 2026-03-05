@@ -1,97 +1,56 @@
 import { MementoMori } from "@/components/MementoMori";
 import { DailyQuote } from "@/components/DailyQuote";
-import { HabitTracker } from "@/components/HabitTracker";
-import { DisciplineMode } from "@/components/DisciplineMode";
-import { DistractionTracker } from "@/components/DistractionTracker";
+import { HabitTracker, SpartanMode } from "@/components/HabitTracker";
 import { DailyJournal } from "@/components/DailyJournal";
-import { ProgressDashboard } from "@/components/ProgressDashboard";
+import { LevelSystem, AchievementSystem } from "@/components/LevelSystem";
 import { FocusMode } from "@/components/FocusMode";
+import { NoFapTracker } from "@/components/NoFapTracker";
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-};
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@shared/routes";
+import { format } from "date-fns";
 
 export default function Dashboard() {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const { data: habits } = useQuery({ queryKey: [api.habits.list.path], queryFn: async () => (await fetch(api.habits.list.path)).json() });
+  const { data: logs } = useQuery({ queryKey: [api.habitLogs.list.path, today], queryFn: async () => (await fetch(`${api.habitLogs.list.path}?date=${today}`)).json() });
+  
+  const completedCount = logs?.filter((l: any) => l.completed).length || 0;
+  const totalCount = habits?.length || 0;
+  const score = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-foreground pb-20">
-      {/* Top Navigation / Header */}
+    <div className="min-h-screen bg-[#0f0f0f] text-foreground pb-20 font-inter">
       <header className="border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Flame className="text-primary fill-primary/20" size={28} />
-            <h1 className="font-cinzel text-2xl font-bold tracking-widest text-primary drop-shadow-[0_0_10px_rgba(212,175,55,0.3)]">FORGE</h1>
-          </div>
-          <p className="hidden md:block font-serif italic text-muted-foreground text-sm">
-            Forge Discipline Daily.
-          </p>
-          <div className="flex gap-4 font-cinzel text-xs uppercase tracking-widest font-semibold">
-            <span className="text-primary cursor-pointer border-b border-primary">Dashboard</span>
-            <span className="text-muted-foreground hover:text-foreground cursor-pointer transition-colors">History</span>
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3"><Flame className="text-primary" size={28} /><h1 className="font-cinzel text-2xl font-bold tracking-widest text-primary drop-shadow-[0_0_10px_rgba(212,175,55,0.3)]">STOICFORGE</h1></div>
+          <div className="flex items-center gap-6">
+             <div className="text-right"><div className="text-[10px] uppercase font-bold text-muted-foreground leading-none">Discipline Score</div><div className="text-xl font-bold font-mono text-primary">{score}%</div></div>
+             <div className="font-cinzel text-xs uppercase tracking-widest font-semibold flex gap-4"><span className="text-primary border-b border-primary cursor-pointer">Dashboard</span><span className="text-muted-foreground hover:text-foreground cursor-pointer">History</span></div>
           </div>
         </div>
       </header>
 
-      {/* Main Content Grid */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12">
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8"
-        >
-          
-          {/* Left Column (Focus & Action) */}
+      <main className="max-w-7xl mx-auto px-4 py-8 pt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-4 space-y-8">
+            <LevelSystem />
+            <FocusMode />
+            <HabitTracker />
+            <SpartanMode />
+          </div>
           <div className="lg:col-span-5 space-y-8">
-            <motion.div variants={itemVariants}>
-              <FocusMode />
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <HabitTracker />
-            </motion.div>
-            
-            <motion.div variants={itemVariants}>
-              <DisciplineMode />
-            </motion.div>
+            <DailyQuote />
+            <NoFapTracker />
+            <DailyJournal />
           </div>
-
-          {/* Right Column (Reflection & Perspective) */}
-          <div className="lg:col-span-7 space-y-8 flex flex-col">
-            <motion.div variants={itemVariants}>
-              <DailyQuote />
-            </motion.div>
-
-            <motion.div variants={itemVariants}>
-              <DistractionTracker />
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="flex-1">
-              <DailyJournal />
-            </motion.div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <motion.div variants={itemVariants}>
-                <ProgressDashboard />
-              </motion.div>
-              
-              <motion.div variants={itemVariants}>
-                <MementoMori />
-              </motion.div>
-            </div>
+          <div className="lg:col-span-3 space-y-8">
+            <AchievementSystem />
+            <MementoMori />
+            <div className="p-6 bg-secondary/10 border border-border/50 rounded-2xl"><div className="text-[10px] uppercase font-bold text-muted-foreground mb-4">Daily Stats</div><div className="space-y-3"><div className="flex justify-between"><span className="text-xs text-muted-foreground">Tasks</span><span className="text-xs font-bold">{completedCount} / {totalCount}</span></div><div className="flex justify-between"><span className="text-xs text-muted-foreground">Focus Time</span><span className="text-xs font-bold">0h 0m</span></div></div></div>
           </div>
-
-        </motion.div>
+        </div>
       </main>
     </div>
   );
