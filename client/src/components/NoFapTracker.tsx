@@ -1,12 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, buildUrl } from "@shared/routes";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
 import { ShieldCheck, XCircle, AlertTriangle } from "lucide-react";
-import { useHabitLogs, useToggleHabitLog } from "@/hooks/use-habit-logs";
 import { format } from "date-fns";
-import { useHabits } from "@/hooks/use-habits";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { useState } from "react";
+import { useHabits, useHabitLogs, useToggleHabitLog, useHabitStreak } from "@/hooks/use-local-storage";
 
 export function NoFapTracker() {
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -15,7 +12,7 @@ export function NoFapTracker() {
   const { data: logs } = useHabitLogs(today);
   const log = logs?.find(l => l.habitId === habit?.id);
   const toggleLog = useToggleHabitLog();
-  const { data: streakData } = useQuery({ queryKey: [api.habitLogs.streaks.path, habit?.id], queryFn: async () => (await fetch(buildUrl(api.habitLogs.streaks.path, { id: habit!.id }))).json(), enabled: !!habit });
+  const { data: streakData } = useHabitStreak(habit?.id || 0);
   const [emergencyOpen, setEmergencyOpen] = useState(false);
 
   if (!habit) return null;

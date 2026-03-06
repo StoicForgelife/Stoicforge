@@ -1,9 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, buildUrl } from "@shared/routes";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
 import { Progress } from "./ui/progress";
 import { Trophy, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUserStats, useAchievements } from "@/hooks/use-local-storage";
+import { format } from "date-fns";
 
 const RANKS = [
   { level: 46, title: "Eternal" },
@@ -19,7 +20,7 @@ const RANKS = [
 ];
 
 export function LevelSystem() {
-  const { data: stats } = useQuery({ queryKey: [api.userStats.get.path], queryFn: async () => (await fetch(api.userStats.get.path)).json() });
+  const { data: stats } = useUserStats();
   if (!stats) return null;
   const level = stats.level;
   const xpInLevel = stats.totalXp % 100;
@@ -67,7 +68,7 @@ export function LevelSystem() {
 }
 
 export function AchievementSystem() {
-  const { data: achs } = useQuery({ queryKey: [api.achievements.list.path], queryFn: async () => (await fetch(api.achievements.list.path)).json() });
+  const { data: achs } = useAchievements();
   
   return (
     <Card className="border-white/5">
@@ -82,7 +83,7 @@ export function AchievementSystem() {
           <motion.div 
             whileHover={{ scale: 1.02 }}
             key={a.id} 
-            className={`p-3 rounded-xl border flex flex-col gap-1 transition-all duration-500 relative overflow-hidden ${a.unlockedAt ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(212,175,55,0.1)]' : 'bg-secondary/10 border-border/30 opacity-40 grayscaled'}`}
+            className={`p-3 rounded-xl border flex flex-col gap-1 transition-all duration-500 relative overflow-hidden ${a.unlockedAt ? 'bg-primary/10 border-primary/50 shadow-[0_0_10px_rgba(212,175,55,0.1)]' : 'bg-secondary/10 border-border/30 opacity-40 grayscale'}`}
           >
             {a.unlockedAt && <div className="absolute top-0 left-0 w-full h-0.5 bg-primary/40" />}
             <span className="text-xs font-bold tracking-tight">{a.isSecret && !a.unlockedAt ? "???" : a.name}</span>

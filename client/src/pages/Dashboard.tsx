@@ -9,17 +9,16 @@ import { LevelSystem, AchievementSystem } from "@/components/LevelSystem";
 import { FocusMode } from "@/components/FocusMode";
 import { NoFapTracker } from "@/components/NoFapTracker";
 import { ProgressDashboard } from "@/components/ProgressDashboard";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@shared/routes";
+import { useHabits, useHabitLogs, useUserStats } from "@/hooks/use-local-storage";
 
 export default function Dashboard() {
   const [time, setTime] = useState(new Date());
   useEffect(() => { const i = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(i); }, []);
 
   const today = format(new Date(), 'yyyy-MM-dd');
-  const { data: habits } = useQuery({ queryKey: [api.habits.list.path], queryFn: async () => (await fetch(api.habits.list.path)).json() });
-  const { data: logs } = useQuery({ queryKey: [api.habitLogs.list.path, today], queryFn: async () => (await fetch(`${api.habitLogs.list.path}?date=${today}`)).json() });
-  const { data: stats } = useQuery({ queryKey: [api.userStats.get.path], queryFn: async () => (await fetch(api.userStats.get.path)).json() });
+  const { data: habits } = useHabits();
+  const { data: logs } = useHabitLogs(today);
+  const { data: stats } = useUserStats();
 
   const completedCount = logs?.filter((l: any) => l.completed).length || 0;
   const totalCount = habits?.length || 0;

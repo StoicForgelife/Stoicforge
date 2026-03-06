@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
-import { useJournalEntry, useSaveJournalEntry } from "@/hooks/use-journal";
 import { BookOpen, CheckCircle2, History } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@shared/routes";
+import { useJournalEntry, useJournalEntries, useSaveJournalEntry } from "@/hooks/use-local-storage";
 
 export function DailyJournal() {
   const today = format(new Date(), 'yyyy-MM-dd');
   const { data: entry, isLoading } = useJournalEntry(today);
-  const { data: history, refetch: refetchHistory } = useQuery({ queryKey: [api.journalEntries.list.path], queryFn: async () => (await fetch(api.journalEntries.list.path)).json() });
+  const { data: history } = useJournalEntries();
   const saveEntry = useSaveJournalEntry();
   const [content, setContent] = useState("");
   const [isSaved, setIsSaved] = useState(false);
@@ -26,7 +24,6 @@ export function DailyJournal() {
     }, {
       onSuccess: () => {
         setIsSaved(true);
-        refetchHistory();
       }
     });
   };

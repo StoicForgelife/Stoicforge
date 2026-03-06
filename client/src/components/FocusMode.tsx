@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./Card";
 import { Timer, Play, Pause, Square, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@shared/routes";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateFocusSession, useUserStats, useUpdateUserStats } from "@/hooks/use-local-storage";
 
 const XP_STAGES = [
   { mins: 120, xp: 60 },
@@ -21,35 +20,10 @@ export function FocusMode() {
   const [isMinimal, setIsMinimal] = useState(false);
   const [showXpPopup, setShowXpPopup] = useState<{show: boolean, xp: number}>({ show: false, xp: 0 });
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  const createSession = useMutation({
-    mutationFn: async (data: any) => {
-      const res = await fetch(api.focusSessions.create.path, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      return res.json();
-    },
-    onSuccess: (data) => {
-      // Immediate XP Update
-      queryClient.setQueryData([api.userStats.get.path], (old: any) => ({
-        ...old,
-        totalXp: old.totalXp + data.xpEarned,
-        level: Math.floor((old.totalXp + data.xpEarned) / 100) + 1
-      }));
-      
-      setShowXpPopup({ show: true, xp: data.xpEarned });
-      setTimeout(() => setShowXpPopup({ show: false, xp: 0 }), 3000);
-
-      toast({
-        title: "Focus Session Complete",
-        description: `+${data.xpEarned} XP Earned. Discipline grows.`,
-      });
-    }
-  });
+  const { data: stats } = useUserStats();
+  const updateStats = useUpdateUserStats();
+  const createSession = useCreateFocusSession();
 
   useEffect(() => {
     if (isActive) {
@@ -68,11 +42,23 @@ export function FocusMode() {
       if (mins >= stage.mins) { xp = stage.xp; break; }
     }
     if (mins > 0) {
-      createSession.mutate({
+      const sessionData = {
         date: format(new Date(), 'yyyy-MM-dd'),
         durationMinutes: mins,
         startTime: format(new Date(), 'HH:mm'),
         xpEarned: xp
+      };
+      
+      createSession.mutate(sessionData, {
+        onSuccess: (data) => {
+          if (stats) {
+            const newXp = stats.totalXp + xp;
+            updateStats.mutate({ totalXp: newXp, level: Math.floor(newXp / 100) + 1 });
+            setShowXpPopup({ show: true, xp: xp });
+            setTimeout(() => setShowXpPopup({ show: false, xp: 0 }), 3000);
+            toast({ title: "Focus Session Complete", description: `+${xp} XP Earned. Discipline grows.` });
+          }
+        }
       });
     }
     setSeconds(0);

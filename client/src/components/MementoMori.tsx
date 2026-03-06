@@ -2,16 +2,11 @@ import { useState, useEffect } from "react";
 import { format, differenceInDays, differenceInYears, addYears } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
 import { motion, AnimatePresence } from "framer-motion";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "@shared/routes";
+import { useUserStats, useUpdateUserStats } from "@/hooks/use-local-storage";
 
 export function MementoMori() {
-  const queryClient = useQueryClient();
-  const { data: stats } = useQuery({ queryKey: [api.userStats.get.path], queryFn: async () => (await fetch(api.userStats.get.path)).json() });
-  const updateStats = useMutation({
-    mutationFn: async (dob: string) => fetch('/api/user-stats', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dob }) }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [api.userStats.get.path] })
-  });
+  const { data: stats } = useUserStats();
+  const updateStats = useUpdateUserStats();
 
   const [dobInput, setDobInput] = useState("");
 
@@ -26,7 +21,7 @@ export function MementoMori() {
           <div className="space-y-2">
             <label className="text-[10px] uppercase font-bold text-muted-foreground">Date of Birth</label>
             <input type="date" value={dobInput} onChange={(e) => setDobInput(e.target.value)} className="w-full bg-background border border-border rounded-lg p-2 text-sm" />
-            <button onClick={() => updateStats.mutate(dobInput)} disabled={!dobInput} className="w-full bg-primary text-primary-foreground py-2 rounded-lg font-bold text-xs uppercase tracking-widest">Inscribe</button>
+            <button onClick={() => updateStats.mutate({ dob: dobInput })} disabled={!dobInput} className="w-full bg-primary text-primary-foreground py-2 rounded-lg font-bold text-xs uppercase tracking-widest">Inscribe</button>
           </div>
         </CardContent>
       </Card>

@@ -1,14 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar } from 'recharts';
-import { format, subDays, startOfWeek, startOfMonth, startOfYear, eachDayOfInterval, eachMonthOfInterval, isSameDay, isSameMonth } from "date-fns";
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { format, startOfWeek, startOfMonth, startOfYear, eachDayOfInterval, eachMonthOfInterval, isSameMonth } from "date-fns";
 import { Activity } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@shared/routes";
+import { useFocusSessions } from "@/hooks/use-local-storage";
 
 export function ProgressDashboard() {
   const [range, setRange] = useState<'Day' | 'Week' | 'Month' | 'Year'>('Week');
-  const { data: sessions } = useQuery({ queryKey: [api.focusSessions.list.path], queryFn: async () => (await fetch(api.focusSessions.list.path)).json() });
+  const { data: sessions } = useFocusSessions();
 
   const getData = () => {
     if (!sessions) return [];

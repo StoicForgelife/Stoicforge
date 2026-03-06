@@ -2,39 +2,23 @@ import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Plus, X, Check, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
-import { useHabits, useCreateHabit, useDeleteHabit } from "@/hooks/use-habits";
-import { useHabitLogs, useToggleHabitLog } from "@/hooks/use-habit-logs";
 import { motion, AnimatePresence } from "framer-motion";
-import { Progress } from "./ui/progress";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useHabits, useCreateHabit, useDeleteHabit, useHabitLogs, useToggleHabitLog, useUserStats, useUpdateUserStats } from "@/hooks/use-local-storage";
 
 export function HabitTracker() {
   const today = format(new Date(), 'yyyy-MM-dd');
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: habits, isLoading: isLoadingHabits } = useHabits();
   const { data: logs, isLoading: isLoadingLogs } = useHabitLogs(today);
   const createHabit = useCreateHabit();
   const deleteHabit = useDeleteHabit();
   const toggleLog = useToggleHabitLog();
+  const { data: stats } = useUserStats();
+  const updateStats = useUpdateUserStats();
+
   const [newHabitName, setNewHabitName] = useState("");
   const [isAdding, setIsAdding] = useState(false);
-
-  const updateXp = useMutation({
-    mutationFn: async (xp: number) => {
-      const stats = await (await fetch('/api/user-stats')).json();
-      return fetch('/api/user-stats', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ totalXp: stats.totalXp + xp, level: Math.floor((stats.totalXp + xp) / 100) + 1 })
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user-stats'] });
-      toast({ title: "XP Earned", description: "+10 XP Recorded" });
-    }
-  });
 
   const handleAddHabit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +29,11 @@ export function HabitTracker() {
   const handleToggle = (habit: any, isCompleted: boolean) => {
     toggleLog.mutate({ habitId: habit.id, date: today, completed: !isCompleted, currentValue: isCompleted ? 0 : 1 }, {
       onSuccess: () => {
-        if (!isCompleted) updateXp.mutate(habit.xpReward);
+        if (!isCompleted && stats) {
+          const newXp = stats.totalXp + habit.xpReward;
+          updateStats.mutate({ totalXp: newXp, level: Math.floor(newXp / 100) + 1 });
+          toast({ title: "XP Earned", description: `+${habit.xpReward} XP Recorded` });
+        }
       }
     });
   };
@@ -92,32 +80,23 @@ export function HabitTracker() {
 
 export function SpartanMode() {
   const today = format(new Date(), 'yyyy-MM-dd');
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: habits } = useHabits();
   const { data: logs } = useHabitLogs(today);
   const toggleLog = useToggleHabitLog();
-  const spartanHabits = habits?.filter(h => h.isSpartan);
+  const { data: stats } = useUserStats();
+  const updateStats = useUpdateUserStats();
 
-  const updateXp = useMutation({
-    mutationFn: async (xp: number) => {
-      const stats = await (await fetch('/api/user-stats')).json();
-      return fetch('/api/user-stats', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ totalXp: stats.totalXp + xp, level: Math.floor((stats.totalXp + xp) / 100) + 1 })
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user-stats'] });
-      toast({ title: "Spartan XP Earned", description: "Extra discipline recorded." });
-    }
-  });
+  const spartanHabits = habits?.filter(h => h.isSpartan);
 
   const handleToggle = (habit: any, isCompleted: boolean) => {
     toggleLog.mutate({ habitId: habit.id, date: today, completed: !isCompleted, currentValue: isCompleted ? 0 : 1 }, {
       onSuccess: () => {
-        if (!isCompleted) updateXp.mutate(habit.xpReward);
+        if (!isCompleted && stats) {
+          const newXp = stats.totalXp + habit.xpReward;
+          updateStats.mutate({ totalXp: newXp, level: Math.floor(newXp / 100) + 1 });
+          toast({ title: "Spartan XP Earned", description: "Extra discipline recorded." });
+        }
       }
     });
   };
