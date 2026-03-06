@@ -198,3 +198,23 @@ export function useUnlockAchievement() {
     },
   });
 }
+
+export function useNoFap() {
+  return useQuery({
+    queryKey: ["nofap"],
+    queryFn: () => storage.getNoFap(),
+  });
+}
+
+export function useUpdateNoFap() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { streak: number; bestStreak: number }) => {
+      storage.saveNoFap(data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["nofap"] });
+    },
+  });
+}

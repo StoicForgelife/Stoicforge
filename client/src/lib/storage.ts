@@ -7,6 +7,12 @@ const KEYS = {
   JOURNAL_ENTRIES: "stoicforge_journal_entries",
   FOCUS_SESSIONS: "stoicforge_focus_sessions",
   ACHIEVEMENTS: "stoicforge_achievements",
+  NOFAP: "stoicforge_nofap",
+};
+
+const DEFAULT_NOFAP = {
+  streak: 0,
+  bestStreak: 0,
 };
 
 const DEFAULT_HABITS: Habit[] = [
@@ -69,4 +75,7 @@ export const storage = {
 
   getAchievements: () => get<Achievement[]>(KEYS.ACHIEVEMENTS, DEFAULT_ACHIEVEMENTS),
   saveAchievements: (achievements: Achievement[]) => save(KEYS.ACHIEVEMENTS, achievements),
+
+  getNoFap: () => get<{ streak: number; bestStreak: number }>(KEYS.NOFAP, DEFAULT_NOFAP),
+  saveNoFap: (data: { streak: number; bestStreak: number }) => save(KEYS.NOFAP, data),
 };
