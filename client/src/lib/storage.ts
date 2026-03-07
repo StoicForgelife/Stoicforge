@@ -14,6 +14,7 @@ const KEYS = {
 const DEFAULT_NOFAP = {
   streak: 0,
   bestStreak: 0,
+  lastCleanDay: null as string | null,
 };
 
 const DEFAULT_HABITS: Habit[] = [
@@ -77,8 +78,8 @@ export const storage = {
   getAchievements: () => get<Achievement[]>(KEYS.ACHIEVEMENTS, DEFAULT_ACHIEVEMENTS),
   saveAchievements: (achievements: Achievement[]) => save(KEYS.ACHIEVEMENTS, achievements),
 
-  getNoFap: () => get<{ streak: number; bestStreak: number }>(KEYS.NOFAP, DEFAULT_NOFAP),
-  saveNoFap: (data: { streak: number; bestStreak: number }) => save(KEYS.NOFAP, data),
+  getNoFap: () => get<{ streak: number; bestStreak: number; lastCleanDay: string | null }>(KEYS.NOFAP, DEFAULT_NOFAP),
+  saveNoFap: (data: { streak: number; bestStreak: number; lastCleanDay: string | null }) => save(KEYS.NOFAP, data),
 
   getRunningFocus: () => get<{ startTime: number } | null>(KEYS.RUNNING_FOCUS, null),
   saveRunningFocus: (data: { startTime: number } | null) => save(KEYS.RUNNING_FOCUS, data),

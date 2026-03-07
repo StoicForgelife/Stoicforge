@@ -209,7 +209,7 @@ export function useNoFap() {
 export function useUpdateNoFap() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { streak: number; bestStreak: number }) => {
+    mutationFn: async (data: { streak: number; bestStreak: number; lastCleanDay: string | null }) => {
       storage.saveNoFap(data);
       return data;
     },

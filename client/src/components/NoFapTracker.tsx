@@ -14,11 +14,21 @@ export function NoFapTracker() {
 
   const streak = nofapData?.streak || 0;
   const bestStreak = nofapData?.bestStreak || 0;
+  const lastCleanDay = nofapData?.lastCleanDay || null;
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
 
   const handleClean = () => {
+    if (lastCleanDay === todayStr) {
+      toast({
+        title: "Already Logged",
+        description: "You have already recorded your victory for today.",
+      });
+      return;
+    }
+
     const newStreak = streak + 1;
     const newBest = Math.max(bestStreak, newStreak);
-    updateNoFap.mutate({ streak: newStreak, bestStreak: newBest });
+    updateNoFap.mutate({ streak: newStreak, bestStreak: newBest, lastCleanDay: todayStr });
     toast({
       title: "Clean Day Recorded",
       description: "Discipline grows stronger.",
@@ -27,7 +37,7 @@ export function NoFapTracker() {
   };
 
   const handleRelapse = () => {
-    updateNoFap.mutate({ streak: 0, bestStreak });
+    updateNoFap.mutate({ streak: 0, bestStreak, lastCleanDay: null });
     toast({
       title: "Relapse Recorded",
       description: "Rise again. The path remains.",
@@ -46,7 +56,7 @@ export function NoFapTracker() {
         <div className="grid grid-cols-3 gap-2">
           <button 
             onClick={handleClean} 
-            className="p-2 rounded-lg text-[10px] font-bold uppercase transition-all flex flex-col items-center gap-1 border bg-secondary/30 border-border/50 text-muted-foreground hover:bg-green-500/20 hover:border-green-500/50 hover:text-green-500"
+            className={`p-2 rounded-lg text-[10px] font-bold uppercase transition-all flex flex-col items-center gap-1 border ${lastCleanDay === todayStr ? 'bg-green-500/20 border-green-500/50 text-green-500' : 'bg-secondary/30 border-border/50 text-muted-foreground hover:bg-green-500/20 hover:border-green-500/50 hover:text-green-500'}`}
           >
             <ShieldCheck size={16} /> Clean Day
           </button>
