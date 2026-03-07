@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
 import { Timer, Play, Pause, Square, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { format, differenceInMinutes, startOfDay, endOfDay, addDays, isSameDay } from "date-fns";
+import { format, differenceInMinutes, endOfDay, isSameDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateFocusSession, useUserStats, useUpdateUserStats, useRunningFocus, useSaveRunningFocus } from "@/hooks/use-local-storage";
 
@@ -24,11 +24,33 @@ const MOTIVATIONAL_MESSAGES = [
   { mins: 0, text: "Begin your ascent." }
 ];
 
+const FULLSCREEN_QUOTES = [
+  "Discipline is freedom.",
+  "Stay the course.",
+  "You are here to forge yourself.",
+  "The obstacle is the way.",
+  "Endure and persist.",
+  "Focus is power.",
+  "Every minute matters.",
+  "Forge the mind.",
+  "Strength through discipline."
+];
+
+const BACKGROUND_IMAGES = [
+  "https://images.unsplash.com/photo-1599708137356-438407137f80?q=80&w=1600&auto=format&fit=crop", // Roman Statue
+  "https://images.unsplash.com/photo-1550684376-efcbd6e3f031?q=80&w=1600&auto=format&fit=crop", // Dark marble
+  "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?q=80&w=1600&auto=format&fit=crop", // Ember/Dark
+  "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1600&auto=format&fit=crop", // Ancient architecture
+  "https://images.unsplash.com/photo-1620121478247-ec786b9be2fa?q=80&w=1600&auto=format&fit=crop"  // Dark texture
+];
+
 export function FocusMode() {
   const [isActive, setIsActive] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [isMinimal, setIsMinimal] = useState(false);
   const [showXpPopup, setShowXpPopup] = useState<{show: boolean, xp: number}>({ show: false, xp: 0 });
+  const [currentQuote, setCurrentQuote] = useState("");
+  const [currentBg, setCurrentBg] = useState("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const { data: stats } = useUserStats();
@@ -38,7 +60,6 @@ export function FocusMode() {
   const { data: runningSession } = useRunningFocus();
   const saveRunningFocus = useSaveRunningFocus();
 
-  // Restore session on load
   useEffect(() => {
     if (runningSession?.startTime) {
       const elapsed = Math.floor((Date.now() - runningSession.startTime) / 1000);
@@ -54,7 +75,6 @@ export function FocusMode() {
           const elapsed = Math.floor((Date.now() - runningSession.startTime) / 1000);
           setSeconds(elapsed);
         } else {
-          // If for some reason we don't have a start time but active, start one
           const now = Date.now() - (seconds * 1000);
           saveRunningFocus.mutate({ startTime: now });
         }
@@ -90,7 +110,6 @@ export function FocusMode() {
       return;
     }
 
-    // Handle midnight crossing
     const startD = new Date(startTime);
     const endD = new Date(endTime);
     
@@ -100,21 +119,17 @@ export function FocusMode() {
     }
 
     if (!isSameDay(startD, endD)) {
-      // Split session
       const endOfStartDay = endOfDay(startD);
       const minsFirstDay = differenceInMinutes(endOfStartDay, startD) + 1;
       const minsSecondDay = totalMins - minsFirstDay;
 
-      // Save yesterday's part
       createSession.mutate({
         date: format(startD, 'yyyy-MM-dd'),
         durationMinutes: minsFirstDay,
         startTime: format(startD, 'HH:mm'),
-        xpEarned: 0 // We'll award all XP to the total completion for simplicity or split it?
-        // Requirement says: "XP and daily focus totals should be distributed according to the time belonging to each day."
+        xpEarned: 0
       });
 
-      // Save today's part
       createSession.mutate({
         date: format(endD, 'yyyy-MM-dd'),
         durationMinutes: minsSecondDay,
@@ -149,6 +164,8 @@ export function FocusMode() {
     if (!isMinimal) {
       try {
         await document.documentElement.requestFullscreen();
+        setCurrentQuote(FULLSCREEN_QUOTES[Math.floor(Math.random() * FULLSCREEN_QUOTES.length)]);
+        setCurrentBg(BACKGROUND_IMAGES[Math.floor(Math.random() * BACKGROUND_IMAGES.length)]);
         setIsMinimal(true);
       } catch (e) {
         setIsMinimal(true);
@@ -196,48 +213,54 @@ export function FocusMode() {
       </AnimatePresence>
 
       {isMinimal ? (
-        <motion.div layoutId="focus-container" className="fixed inset-0 z-[100] bg-[#0f0f0f] flex flex-col items-center justify-center text-center p-8">
+        <motion.div 
+          layoutId="focus-container" 
+          className="fixed inset-0 z-[100] bg-[#0f0f0f] flex flex-col items-center justify-center text-center p-8 overflow-hidden"
+          style={{
+            backgroundImage: `linear-gradient(rgba(15, 15, 15, 0.8), rgba(15, 15, 15, 0.8)), url(${currentBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
           <button 
             onClick={toggleMinimal} 
-            className="absolute top-8 right-8 p-2 rounded-full bg-secondary/20 text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+            className="absolute top-8 right-8 p-2 rounded-full bg-secondary/20 text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 z-20"
           >
             <X size={24} />
             <span className="text-xs font-cinzel uppercase tracking-widest hidden md:inline">Exit Focus Mode</span>
           </button>
 
-          <div className="text-[12rem] font-mono font-bold text-foreground leading-none drop-shadow-[0_0_30px_rgba(212,175,55,0.1)] tabular-nums">{displayTime()}</div>
-          
-          <div className="mt-8 text-primary font-cinzel text-2xl tracking-widest h-8">
-            {isActive && motivationalMessage}
-          </div>
+          <div className="relative z-10 flex flex-col items-center">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 text-primary/60 font-cinzel text-xl tracking-[0.3em] uppercase"
+            >
+              {currentQuote}
+            </motion.div>
 
-          <div className="flex gap-8 mt-12">
-            <button onClick={isActive ? handlePause : handleStart} className="p-6 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all">
-              {isActive ? <Pause size={48} /> : <Play size={48} />}
-            </button>
-            <button onClick={handleEnd} className="p-6 rounded-full bg-secondary/30 border border-border/50 text-muted-foreground hover:text-foreground transition-all">
-              <Square size={48} />
-            </button>
+            <div className="text-[12rem] font-mono font-bold text-foreground leading-none drop-shadow-[0_0_30px_rgba(212,175,55,0.2)] tabular-nums">{displayTime()}</div>
+            
+            <div className="mt-8 text-primary font-cinzel text-2xl tracking-widest h-8">
+              {isActive && motivationalMessage}
+            </div>
+
+            <div className="flex gap-8 mt-12">
+              <button onClick={isActive ? handlePause : handleStart} className="p-6 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-all">
+                {isActive ? <Pause size={48} /> : <Play size={48} />}
+              </button>
+              <button onClick={handleEnd} className="p-6 rounded-full bg-secondary/30 border border-border/50 text-muted-foreground hover:text-foreground transition-all">
+                <Square size={48} />
+              </button>
+            </div>
+            <p className="mt-12 text-muted-foreground font-serif italic text-lg opacity-40">"Focus is the art of saying no."</p>
           </div>
-          <p className="mt-12 text-muted-foreground font-serif italic text-lg opacity-60">"Focus is the art of saying no."</p>
         </motion.div>
       ) : (
         <Card className="relative overflow-hidden group">
-          {/* Border Animation */}
+          {/* Border Runner Animation */}
           {isActive && (
-            <div className="absolute inset-0 z-0 pointer-events-none">
-              <motion.div 
-                className="absolute inset-0 border-2 border-primary rounded-xl"
-                initial={{ pathLength: 0 }}
-                animate={{ pathLength: 1 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                style={{ 
-                  clipPath: 'inset(0 0 0 0 round 0.75rem)',
-                  boxShadow: 'inset 0 0 15px rgba(212,175,55,0.2)'
-                }}
-              />
-              <div className="absolute inset-0 animate-border-glow border-2 border-primary/30 rounded-xl" />
-            </div>
+            <div className="animate-border-runner pointer-events-none" />
           )}
 
           <CardHeader className="flex flex-row items-center justify-between pb-2 relative z-10">

@@ -1,0 +1,105 @@
+You are modifying the StoicForge productivity web application.
+
+Important constraints:
+
+* Do NOT change the existing UI layout or page structure.
+* Only improve the behavior of fullscreen focus mode and timer animation.
+* The project is frontend-only and uses localStorage.
+
+Implement the following improvements.
+
+---
+
+1. Replace the glowing border timer animation.
+
+Current behavior:
+The focus timer shows a glowing border effect.
+
+Required behavior:
+
+Replace the glow with a moving border runner animation.
+
+Details:
+
+* A thin bright line should travel around the border of the focus timer box.
+* The line should move clockwise continuously.
+* It should look like a "snake" or runner moving along the border edges.
+* The animation should run only while the timer is active.
+* The animation should stop when the timer is paused or finished.
+
+Do not change the layout or structure of the timer component.
+
+---
+
+2. Fix fullscreen focus mode so it becomes true fullscreen.
+
+Current issue:
+The page expands but the browser UI is still visible.
+
+Required behavior:
+
+* Use the browser Fullscreen API.
+* When fullscreen mode activates, the browser address bar and tabs should disappear.
+* The page should occupy the entire screen.
+
+Support both:
+
+* ESC key to exit fullscreen
+* Visible exit button (X or "Exit Focus Mode") in a corner.
+
+---
+
+3. Add rotating fullscreen background images.
+
+When fullscreen focus mode is activated:
+
+* Show a dark themed background image behind the timer.
+* Each time fullscreen is activated, randomly choose a different background image.
+
+Background style requirements:
+
+* Stoic / discipline themed
+* Examples:
+
+  * Roman statues
+  * Ancient battlefield atmosphere
+  * Dark marble textures
+  * Warrior silhouettes
+  * Subtle fire or ember backgrounds
+
+Important:
+
+* Background must be dark and subtle.
+* The timer must remain clearly visible.
+* Do not move or resize the timer component.
+
+---
+
+4. Add rotating motivational quotes in fullscreen focus mode.
+
+When fullscreen focus mode starts:
+
+Display a motivational quote near the timer.
+
+Requirements:
+
+* Each fullscreen session should display a different random quote.
+* Quotes should be short and discipline/focus related.
+
+Example quotes:
+
+"Discipline is freedom."
+"Stay the course."
+"You are here to forge yourself."
+"The obstacle is the way."
+"Endure and persist."
+"Focus is power."
+"Every minute matters."
+"Forge the mind."
+"Strength through discipline."
+
+Quotes should be visually subtle and not interfere with the timer.
+
+---
+
+Ensure all features integrate correctly with the existing focus timer logic without breaking current functionality.
