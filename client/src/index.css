@@ -1,8 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@keyframes border-glow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.animate-border-glow {
+  animation: border-glow 2s infinite ease-in-out;
+}
 
 @layer base {
   :root {

@@ -218,3 +218,23 @@ export function useUpdateNoFap() {
     },
   });
 }
+
+export function useRunningFocus() {
+  return useQuery({
+    queryKey: ["running-focus"],
+    queryFn: () => storage.getRunningFocus(),
+  });
+}
+
+export function useSaveRunningFocus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { startTime: number } | null) => {
+      storage.saveRunningFocus(data);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["running-focus"] });
+    },
+  });
+}

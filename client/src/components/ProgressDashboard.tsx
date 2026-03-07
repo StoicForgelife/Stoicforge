@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "./Card";
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { format, startOfWeek, startOfMonth, startOfYear, eachDayOfInterval, eachMonthOfInterval, isSameMonth } from "date-fns";
 import { Activity } from "lucide-react";
 import { useState } from "react";
@@ -42,6 +42,14 @@ export function ProgressDashboard() {
 
   const chartData = getData();
 
+  const formatYAxis = (value: number) => {
+    if (value === 0) return '0';
+    if (value < 60) return `${value}m`;
+    const hours = Math.floor(value / 60);
+    const mins = value % 60;
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-6">
@@ -59,7 +67,17 @@ export function ProgressDashboard() {
               <defs><linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/><stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/></linearGradient></defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} />
-              <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }} />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }} 
+                tickFormatter={formatYAxis}
+                width={40}
+              />
+              <Tooltip 
+                contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }}
+                formatter={(value: number) => [formatYAxis(value), 'Focus Time']}
+              />
               <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#colorValue)" />
             </AreaChart>
           </ResponsiveContainer>

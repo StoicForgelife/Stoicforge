@@ -8,6 +8,7 @@ const KEYS = {
   FOCUS_SESSIONS: "stoicforge_focus_sessions",
   ACHIEVEMENTS: "stoicforge_achievements",
   NOFAP: "stoicforge_nofap",
+  RUNNING_FOCUS: "stoicforge_running_focus",
 };
 
 const DEFAULT_NOFAP = {
@@ -78,4 +79,7 @@ export const storage = {
 
   getNoFap: () => get<{ streak: number; bestStreak: number }>(KEYS.NOFAP, DEFAULT_NOFAP),
   saveNoFap: (data: { streak: number; bestStreak: number }) => save(KEYS.NOFAP, data),
+
+  getRunningFocus: () => get<{ startTime: number } | null>(KEYS.RUNNING_FOCUS, null),
+  saveRunningFocus: (data: { startTime: number } | null) => save(KEYS.RUNNING_FOCUS, data),
 };
