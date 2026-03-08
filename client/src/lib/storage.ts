@@ -19,20 +19,20 @@ const DEFAULT_NOFAP = {
 
 const DEFAULT_HABITS: Habit[] = [
   { id: 1, name: "Workout", isCustom: false, goalValue: 1, unit: "session", xpReward: 15, isSpartan: false },
-  { id: 2, name: "Drink Water", isCustom: false, goalValue: 2000, unit: "ml", xpReward: 10, isSpartan: false },
-  { id: 3, name: "Walk", isCustom: false, goalValue: 1, unit: "session", xpReward: 10, isSpartan: false },
-  { id: 4, name: "Study / Work", isCustom: false, goalValue: 4, unit: "h", xpReward: 20, isSpartan: false },
-  { id: 5, name: "Stretching", isCustom: false, goalValue: 1, unit: "session", xpReward: 10, isSpartan: false },
-  { id: 6, name: "Reading", isCustom: false, goalValue: 1, unit: "session", xpReward: 10, isSpartan: false },
-  { id: 7, name: "Meditation", isCustom: false, goalValue: 1, unit: "session", xpReward: 15, isSpartan: false },
+  { id: 2, name: "Drink Water", isCustom: false, goalValue: 4, unit: "L", xpReward: 10, isSpartan: false },
+  { id: 3, name: "Walk", isCustom: false, goalValue: 3000, unit: "steps", xpReward: 10, isSpartan: false },
+  { id: 4, name: "Study / Work", isCustom: false, goalValue: 1, unit: "h", xpReward: 20, isSpartan: false },
+  { id: 5, name: "Stretching", isCustom: false, goalValue: 10, unit: "min", xpReward: 10, isSpartan: false },
+  { id: 6, name: "Reading", isCustom: false, goalValue: 3, unit: "pages", xpReward: 10, isSpartan: false },
+  { id: 7, name: "Meditation", isCustom: false, goalValue: 10, unit: "min", xpReward: 15, isSpartan: false },
   { id: 8, name: "10 Pushups", isCustom: false, goalValue: 1, unit: "set", xpReward: 5, isSpartan: false },
   { id: 9, name: "20 Squats", isCustom: false, goalValue: 1, unit: "set", xpReward: 5, isSpartan: false },
   { id: 10, name: "30 Second Plank", isCustom: false, goalValue: 1, unit: "set", xpReward: 5, isSpartan: false },
-  { id: 11, name: "Cold Shower", isCustom: false, goalValue: 1, unit: "session", xpReward: 30, isSpartan: true },
-  { id: 12, name: "2 Hour Deep Work", isCustom: false, goalValue: 1, unit: "session", xpReward: 50, isSpartan: true },
-  { id: 13, name: "Digital Detox", isCustom: false, goalValue: 1, unit: "session", xpReward: 40, isSpartan: true },
-  { id: 14, name: "Outdoor Walk", isCustom: false, goalValue: 1, unit: "session", xpReward: 20, isSpartan: true },
-  { id: 15, name: "Extra Workout", isCustom: false, goalValue: 1, unit: "session", xpReward: 40, isSpartan: true },
+  { id: 11, name: "Cold Shower", isCustom: false, goalValue: 1, unit: "session", xpReward: 30, isSpartan: true, baseDependency: 1 },
+  { id: 12, name: "4 Hour Deep Work", isCustom: false, goalValue: 1, unit: "session", xpReward: 50, isSpartan: true, baseDependency: 4 },
+  { id: 13, name: "Digital Detox", isCustom: false, goalValue: 1, unit: "session", xpReward: 40, isSpartan: true, baseDependency: 4 },
+  { id: 14, name: "Walk 5km", isCustom: false, goalValue: 1, unit: "session", xpReward: 20, isSpartan: true, baseDependency: 3 },
+  { id: 15, name: "Extra Workout", isCustom: false, goalValue: 1, unit: "session", xpReward: 40, isSpartan: true, baseDependency: 1 },
 ];
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [

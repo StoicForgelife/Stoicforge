@@ -4,7 +4,7 @@ import { Timer, Play, Pause, Square, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, differenceInMinutes, endOfDay, isSameDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { useCreateFocusSession, useUserStats, useUpdateUserStats, useRunningFocus, useSaveRunningFocus } from "@/hooks/use-local-storage";
+import { useCreateFocusSession, useUserStats, useUpdateUserStats, useRunningFocus, useSaveRunningFocus, useUnlockAchievement } from "@/hooks/use-local-storage";
 
 const XP_STAGES = [
   { mins: 120, xp: 60 },
@@ -56,6 +56,7 @@ export function FocusMode() {
   const { data: stats } = useUserStats();
   const updateStats = useUpdateUserStats();
   const createSession = useCreateFocusSession();
+  const unlockAchievement = useUnlockAchievement();
   
   const { data: runningSession } = useRunningFocus();
   const saveRunningFocus = useSaveRunningFocus();
@@ -151,6 +152,9 @@ export function FocusMode() {
       setShowXpPopup({ show: true, xp: xpToAward });
       setTimeout(() => setShowXpPopup({ show: false, xp: 0 }), 3000);
       toast({ title: "Focus Session Complete", description: `+${xpToAward} XP Earned. Discipline grows.` });
+      
+      // Check achievements
+      unlockAchievement.mutate("First Focus Session");
     }
 
     setSeconds(0);

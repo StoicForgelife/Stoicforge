@@ -6,6 +6,25 @@ import { useState } from "react";
 import { useNoFap, useUpdateNoFap } from "@/hooks/use-local-storage";
 import { useToast } from "@/hooks/use-toast";
 
+const NOFAP_STAGES = [
+  { days: 100, stage: "Monk Mind", message: "Your mind is calm and in command." },
+  { days: 60, stage: "Warrior Discipline", message: "Your discipline separates you from the crowd." },
+  { days: 30, stage: "Self Mastery", message: "You have taken control of your impulses." },
+  { days: 21, stage: "Breaking Patterns", message: "Old habits are weakening." },
+  { days: 14, stage: "Mental Control", message: "The mind begins to regain control." },
+  { days: 7, stage: "First Victory", message: "You are stronger than yesterday." },
+  { days: 3, stage: "Urge Resistance", message: "Urges will appear. Stay aware." },
+  { days: 0, stage: "Fresh Start", message: "Your discipline journey begins." },
+];
+
+const MOTIVATIONAL_LINES = [
+  "One moment of weakness erased progress. Start again. Forge yourself.",
+  "Fall seven times, stand eight. The warrior continues.",
+  "Discipline is not punishment. It is freedom from weakness.",
+  "Your body does not define your will. Master your impulses.",
+  "The pain of discipline is nothing compared to the pain of regret.",
+];
+
 export function NoFapTracker() {
   const { data: nofapData } = useNoFap();
   const updateNoFap = useUpdateNoFap();
@@ -16,6 +35,11 @@ export function NoFapTracker() {
   const bestStreak = nofapData?.bestStreak || 0;
   const lastCleanDay = nofapData?.lastCleanDay || null;
   const todayStr = format(new Date(), 'yyyy-MM-dd');
+
+  const getStreakStage = () => {
+    const stage = NOFAP_STAGES.find(s => streak >= s.days);
+    return stage || NOFAP_STAGES[NOFAP_STAGES.length - 1];
+  };
 
   const handleClean = () => {
     if (lastCleanDay === todayStr) {
@@ -37,10 +61,16 @@ export function NoFapTracker() {
   };
 
   const handleRelapse = () => {
+    const brokePrevious = streak > 0;
+    const streakBrokenMsg = brokePrevious 
+      ? `You broke a ${streak} day streak.\n\nRemember the discipline it took to reach there.\n\n` 
+      : "";
+    const reflectionMsg = MOTIVATIONAL_LINES[Math.floor(Math.random() * MOTIVATIONAL_LINES.length)];
+    
     updateNoFap.mutate({ streak: 0, bestStreak, lastCleanDay: null });
     toast({
       title: "Relapse Recorded",
-      description: "Rise again. The path remains.",
+      description: `${streakBrokenMsg}${reflectionMsg}`,
       variant: "destructive",
     });
   };
@@ -52,6 +82,10 @@ export function NoFapTracker() {
         <div className="flex justify-around text-center py-4 bg-orange-500/5 rounded-xl border border-orange-500/10">
           <div><div className="text-2xl font-bold text-orange-500">{streak}</div><div className="text-[10px] uppercase font-bold text-muted-foreground">Current Streak</div></div>
           <div><div className="text-2xl font-bold text-orange-500">{bestStreak}</div><div className="text-[10px] uppercase font-bold text-muted-foreground">Best Streak</div></div>
+        </div>
+        <div className="text-center py-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+          <div className="text-sm font-bold text-orange-500">{getStreakStage().stage}</div>
+          <div className="text-[10px] text-muted-foreground italic mt-1">{getStreakStage().message}</div>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <button 
