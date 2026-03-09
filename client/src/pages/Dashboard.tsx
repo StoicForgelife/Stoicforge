@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Flame, Clock } from "lucide-react";
+import { Flame } from "lucide-react";
+import { useLocation } from "wouter";
 import { MementoMori } from "@/components/MementoMori";
 import { DailyQuote } from "@/components/DailyQuote";
 import { HabitTracker, SpartanMode } from "@/components/HabitTracker";
@@ -10,8 +11,10 @@ import { FocusMode } from "@/components/FocusMode";
 import { NoFapTracker } from "@/components/NoFapTracker";
 import { ProgressDashboard } from "@/components/ProgressDashboard";
 import { useHabits, useHabitLogs, useUserStats } from "@/hooks/use-local-storage";
+import { storage } from "@/lib/storage";
 
 export default function Dashboard() {
+  const [, navigate] = useLocation();
   const [time, setTime] = useState(new Date());
   useEffect(() => { const i = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(i); }, []);
 
@@ -19,9 +22,30 @@ export default function Dashboard() {
   const { data: habits } = useHabits();
   const { data: logs } = useHabitLogs(today);
   const { data: stats } = useUserStats();
+  const { data: focusSessions } = useHabitLogs(today);
+
+  // Save daily history on load
+  useEffect(() => {
+    const history = storage.getDailyHistory();
+    const todayEntry = history.find(e => e.date === today);
+    
+    if (!todayEntry && logs && habits) {
+      const completedTasks = habits.filter(h => !h.isSpartan).map(h => ({
+        name: h.name,
+        completed: logs.some(l => l.habitId === h.id && l.completed),
+      }));
+      history.push({
+        date: today,
+        completedTasks,
+        focusTime: '0h 0m',
+        noFapStatus: 'Clean',
+      });
+      storage.saveDailyHistory(history);
+    }
+  }, [today, logs, habits]);
 
   const completedCount = logs?.filter((l: any) => l.completed).length || 0;
-  const totalCount = habits?.length || 0;
+  const totalCount = habits?.filter((h: any) => !h.isSpartan).length || 0;
   const score = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
@@ -37,7 +61,7 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-6">
              <div className="text-right"><div className="text-[10px] uppercase font-bold text-muted-foreground leading-none">Discipline Score</div><div className="text-xl font-bold font-mono text-primary">{score}%</div></div>
-             <div className="font-cinzel text-xs uppercase tracking-widest font-semibold flex gap-4"><span className="text-primary border-b border-primary cursor-pointer">Dashboard</span><span className="text-muted-foreground hover:text-foreground cursor-pointer">History</span></div>
+             <div className="font-cinzel text-xs uppercase tracking-widest font-semibold flex gap-4"><span className="text-primary border-b border-primary cursor-pointer">Dashboard</span><span className="text-muted-foreground hover:text-foreground cursor-pointer" onClick={() => navigate('/history')}>History</span></div>
           </div>
         </div>
       </header>

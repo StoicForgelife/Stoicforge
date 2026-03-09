@@ -5,16 +5,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useState } from "react";
 import { useNoFap, useUpdateNoFap } from "@/hooks/use-local-storage";
 import { useToast } from "@/hooks/use-toast";
+import { storage } from "@/lib/storage";
 
 const NOFAP_STAGES = [
   { days: 100, stage: "Monk Mind", message: "Your mind is calm and in command." },
   { days: 60, stage: "Warrior Discipline", message: "Your discipline separates you from the crowd." },
   { days: 30, stage: "Self Mastery", message: "You have taken control of your impulses." },
   { days: 21, stage: "Breaking Patterns", message: "Old habits are weakening." },
-  { days: 14, stage: "Mental Control", message: "The mind begins to regain control." },
+  { days: 14, stage: "Mental Control", message: "The mind is gaining control." },
   { days: 7, stage: "First Victory", message: "You are stronger than yesterday." },
   { days: 3, stage: "Urge Resistance", message: "Urges will appear. Stay aware." },
-  { days: 0, stage: "Fresh Start", message: "Your discipline journey begins." },
+  { days: 1, stage: "Fresh Start", message: "Your discipline journey begins." },
+];
+
+const RELAPSE_REASONS = [
+  "Boredom",
+  "Loneliness",
+  "Stress",
+  "Trigger Content",
+  "Lack of Motivation",
+  "Late Night Scrolling",
+  "Other",
 ];
 
 const MOTIVATIONAL_LINES = [
@@ -30,6 +41,8 @@ export function NoFapTracker() {
   const updateNoFap = useUpdateNoFap();
   const { toast } = useToast();
   const [emergencyOpen, setEmergencyOpen] = useState(false);
+  const [relapseDialogOpen, setRelapseDialogOpen] = useState(false);
+  const [selectedReason, setSelectedReason] = useState<string | null>(null);
 
   const streak = nofapData?.streak || 0;
   const bestStreak = nofapData?.bestStreak || 0;
@@ -60,12 +73,21 @@ export function NoFapTracker() {
     });
   };
 
-  const handleRelapse = () => {
+  const handleRelapseSubmit = () => {
     const brokePrevious = streak > 0;
     const streakBrokenMsg = brokePrevious 
       ? `You broke a ${streak} day streak.\n\nRemember the discipline it took to reach there.\n\n` 
       : "";
     const reflectionMsg = MOTIVATIONAL_LINES[Math.floor(Math.random() * MOTIVATIONAL_LINES.length)];
+    
+    // Save relapse to history
+    const history = storage.getDailyHistory();
+    const todayEntry = history.find(e => e.date === todayStr);
+    if (todayEntry) {
+      todayEntry.noFapStatus = `Relapse (${selectedReason || "Unknown"})`;
+      todayEntry.relapseReason = selectedReason;
+    }
+    storage.saveDailyHistory(history);
     
     updateNoFap.mutate({ streak: 0, bestStreak, lastCleanDay: null });
     toast({
@@ -73,6 +95,8 @@ export function NoFapTracker() {
       description: `${streakBrokenMsg}${reflectionMsg}`,
       variant: "destructive",
     });
+    setRelapseDialogOpen(false);
+    setSelectedReason(null);
   };
 
   return (
@@ -94,12 +118,34 @@ export function NoFapTracker() {
           >
             <ShieldCheck size={16} /> Clean Day
           </button>
-          <button 
-            onClick={handleRelapse} 
-            className="p-2 rounded-lg text-[10px] font-bold uppercase transition-all flex flex-col items-center gap-1 border bg-secondary/30 border-border/50 text-muted-foreground hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-500"
-          >
-            <XCircle size={16} /> Relapse
-          </button>
+          <Dialog open={relapseDialogOpen} onOpenChange={setRelapseDialogOpen}>
+            <DialogTrigger asChild>
+              <button className="p-2 rounded-lg text-[10px] font-bold uppercase transition-all flex flex-col items-center gap-1 border bg-secondary/30 border-border/50 text-muted-foreground hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-500">
+                <XCircle size={16} /> Relapse
+              </button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#1c1c1c] border-primary/30">
+              <DialogHeader><DialogTitle className="font-cinzel text-primary text-center">Why Did This Happen?</DialogTitle></DialogHeader>
+              <div className="space-y-3 py-4">
+                {RELAPSE_REASONS.map(reason => (
+                  <button
+                    key={reason}
+                    onClick={() => setSelectedReason(reason)}
+                    className={`w-full p-3 rounded-lg border text-left font-semibold text-sm transition-all ${selectedReason === reason ? 'bg-primary/20 border-primary text-primary' : 'bg-secondary/30 border-border/50 text-foreground hover:border-primary/50'}`}
+                  >
+                    {reason}
+                  </button>
+                ))}
+              </div>
+              <button 
+                onClick={handleRelapseSubmit}
+                disabled={!selectedReason}
+                className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-bold uppercase text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Confirm & Reflect
+              </button>
+            </DialogContent>
+          </Dialog>
           <Dialog open={emergencyOpen} onOpenChange={setEmergencyOpen}>
             <DialogTrigger asChild>
               <button className="p-2 rounded-lg text-[10px] font-bold uppercase transition-all flex flex-col items-center gap-1 border bg-secondary/30 border-border/50 text-muted-foreground hover:bg-yellow-500/20 hover:border-yellow-500/50 hover:text-yellow-500">

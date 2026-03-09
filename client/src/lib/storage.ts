@@ -9,6 +9,7 @@ const KEYS = {
   ACHIEVEMENTS: "stoicforge_achievements",
   NOFAP: "stoicforge_nofap",
   RUNNING_FOCUS: "stoicforge_running_focus",
+  DAILY_HISTORY: "stoicforge_daily_history",
 };
 
 const DEFAULT_NOFAP = {
@@ -18,16 +19,16 @@ const DEFAULT_NOFAP = {
 };
 
 const DEFAULT_HABITS: Habit[] = [
-  { id: 1, name: "Workout", isCustom: false, goalValue: 1, unit: "session", xpReward: 20, isSpartan: false },
-  { id: 3, name: "Walk", isCustom: false, goalValue: 3000, unit: "steps", xpReward: 10, isSpartan: false },
-  { id: 4, name: "Study / Work", isCustom: false, goalValue: 1, unit: "h", xpReward: 25, isSpartan: false },
-  { id: 5, name: "Stretching", isCustom: false, goalValue: 10, unit: "min", xpReward: 10, isSpartan: false },
-  { id: 6, name: "Reading", isCustom: false, goalValue: 3, unit: "pages", xpReward: 10, isSpartan: false },
-  { id: 7, name: "Meditation", isCustom: false, goalValue: 10, unit: "min", xpReward: 15, isSpartan: false },
+  { id: 1, name: "Today's Workout", isCustom: false, goalValue: 1, unit: "session", xpReward: 20, isSpartan: false },
+  { id: 2, name: "Go for a Walk", isCustom: false, goalValue: 1, unit: "session", xpReward: 10, isSpartan: false },
+  { id: 3, name: "Study / Work", isCustom: false, goalValue: 1, unit: "h", xpReward: 25, isSpartan: false },
+  { id: 4, name: "Book Reading", isCustom: false, goalValue: 5, unit: "pages", xpReward: 10, isSpartan: false },
+  { id: 5, name: "Meditation", isCustom: false, goalValue: 1, unit: "session", xpReward: 15, isSpartan: false },
+  { id: 6, name: "Drink Water", isCustom: false, goalValue: 4, unit: "L", xpReward: 10, isSpartan: false },
   { id: 11, name: "Cold Shower", isCustom: false, goalValue: 1, unit: "session", xpReward: 30, isSpartan: true, baseDependency: 1 },
-  { id: 12, name: "4 Hour Deep Work", isCustom: false, goalValue: 1, unit: "session", xpReward: 50, isSpartan: true, baseDependency: 4 },
-  { id: 13, name: "Digital Detox", isCustom: false, goalValue: 1, unit: "session", xpReward: 40, isSpartan: true, baseDependency: 4 },
-  { id: 14, name: "Walk 5km", isCustom: false, goalValue: 1, unit: "session", xpReward: 20, isSpartan: true, baseDependency: 3 },
+  { id: 12, name: "4 Hour Deep Work", isCustom: false, goalValue: 1, unit: "session", xpReward: 50, isSpartan: true, baseDependency: 3 },
+  { id: 13, name: "Digital Detox", isCustom: false, goalValue: 1, unit: "session", xpReward: 40, isSpartan: true, baseDependency: 3 },
+  { id: 14, name: "Walk 5km", isCustom: false, goalValue: 1, unit: "session", xpReward: 20, isSpartan: true, baseDependency: 2 },
   { id: 15, name: "Extra Workout", isCustom: false, goalValue: 1, unit: "session", xpReward: 40, isSpartan: true, baseDependency: 1 },
 ];
 
@@ -79,4 +80,7 @@ export const storage = {
 
   getRunningFocus: () => get<{ startTime: number } | null>(KEYS.RUNNING_FOCUS, null),
   saveRunningFocus: (data: { startTime: number } | null) => save(KEYS.RUNNING_FOCUS, data),
+
+  getDailyHistory: () => get<any[]>(KEYS.DAILY_HISTORY, []),
+  saveDailyHistory: (data: any[]) => save(KEYS.DAILY_HISTORY, data),
 };

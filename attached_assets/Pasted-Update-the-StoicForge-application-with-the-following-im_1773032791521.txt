@@ -1,0 +1,210 @@
+Update the StoicForge application with the following improvements.
+
+Important constraints:
+
+* Do NOT change the UI layout or styling.
+* Only update logic and system behavior.
+* The application uses localStorage for persistence.
+* Keep existing components intact.
+
+---
+
+1. Update Daily Discipline Tasks
+
+Replace the current discipline tasks with the following list.
+
+Today's Workout
++20 XP
+Complete today's workout session.
+
+Go for a Walk
++10 XP
+Go for a walk outside today.
+
+Study / Work
++25 XP
+Complete at least 1 hour of focused work or study.
+
+Book Reading
++10 XP
+Read at least 5 pages of a book.
+
+Meditation
++15 XP
+Meditate for 5–10 minutes.
+
+Drink Water
++10 XP
+Drink at least 4 liters of water.
+
+Remove the following tasks completely if they exist:
+
+Stretching
+10 Pushups
+20 Squats
+30 Second Plank
+Duplicate reading tasks
+Duplicate exercise tasks
+
+Ensure each discipline task:
+
+* Can only be completed once per day.
+* Grants XP only once per day.
+
+---
+
+2. Improve Spartan Mode Logic
+
+Spartan tasks should unlock only after completing the related basic discipline task.
+
+Example logic:
+
+If "Today's Workout" is completed → unlock Spartan task "Extra Workout"
+
+If "Go for a Walk" is completed → unlock Spartan task "Walk 5km"
+
+If "Study / Work" is completed → unlock Spartan task "4 Hour Deep Work"
+
+If the base discipline task is not completed → Spartan task remains locked.
+
+Update Spartan tasks to be more challenging:
+
+Cold Shower
+Take a cold shower for at least 2 minutes.
+
+4 Hour Deep Work
+Accumulate at least 4 hours of focus time.
+
+Digital Detox
+Avoid social media for the entire day.
+
+Walk 5km
+Walk at least 5 kilometers.
+
+Extra Workout
+Add two additional sets to each exercise in your workout.
+
+---
+
+3. Improve NoFap System
+
+Add streak stages with motivational messages.
+
+Stages:
+
+Day 1–2
+Fresh Start
+"Your discipline journey begins."
+
+Day 3–4
+Urge Resistance
+"Urges will appear. Stay aware."
+
+Day 7
+First Victory
+"You are stronger than yesterday."
+
+Day 14
+Mental Control
+"The mind is gaining control."
+
+Day 30
+Self Mastery
+"You have taken control of your impulses."
+
+Day 60
+Warrior Discipline
+"Your discipline separates you from the crowd."
+
+Day 100
+Monk Mind
+"Your mind is calm and in command."
+
+Between milestone days display rotating motivational messages.
+
+---
+
+4. Add Relapse Reflection System
+
+When the user clicks the Relapse button in the NoFap tracker:
+
+Show a reflection panel asking:
+
+"Why did this relapse happen?"
+
+Options:
+
+Boredom
+Loneliness
+Stress
+Trigger Content
+Lack of Motivation
+Late Night Scrolling
+Other
+
+Save the selected reason together with the current date.
+
+---
+
+5. Add Daily Discipline History System
+
+Create a History system accessible from the **History button at the top right of the dashboard**.
+
+The history should automatically store a record of each day.
+
+Each daily record must include:
+
+* Date
+* Completed discipline tasks
+* Total focus time
+* NoFap status
+* Relapse reason (if relapse occurred)
+
+Example entry:
+
+June 18
+
+Today's Workout ✔
+Go for a Walk ✔
+Study / Work ✔
+Book Reading ✔
+Meditation ✘
+Drink Water ✔
+
+Focus Time: 2h 30m
+NoFap: Clean
+
+Example relapse entry:
+
+June 17
+
+Today's Workout ✔
+Go for a Walk ✘
+Study / Work ✔
+Book Reading ✔
+Meditation ✔
+Drink Water ✔
+
+Focus Time: 1h 45m
+NoFap: Relapse (Boredom)
+
+Display history entries in chronological order with the newest entries first.
+
+---
+
+6. Add Focus Timer Animation
+
+Add a subtle animation around the focus timer container while the timer is running.
+
+Requirements:
+
+* A thin runner line moves clockwise around the timer border.
+* Animation starts when the timer starts.
+* Animation pauses when the timer pauses.
+* Animation stops when the session ends.
+
+Do not modify the layout or size of the timer component.
+
+---
+
+Ensure all new systems integrate correctly with the existing XP rewards, achievements, statistics tracking, streak systems, and charts.
