@@ -261,7 +261,7 @@ export function FocusMode() {
           </div>
         </motion.div>
       ) : (
-        <Card className="relative overflow-hidden group">
+        <Card className={`relative group transition-all duration-300 ${isActive ? 'focus-timer-active' : ''}`}>
           {/* Border Runner Animation */}
           {isActive && (
             <div className="animate-border-runner pointer-events-none" />
