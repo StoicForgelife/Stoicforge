@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://stoicforge.life/sitemap.xml
